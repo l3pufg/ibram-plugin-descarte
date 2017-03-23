@@ -17,7 +17,15 @@
 
  <div class="wrap">
 
-    <?php $ibram_opts = get_option($this->plugin_name); ?>
+    <?php
+        $ibram_opts = get_option($this->plugin_name);
+        $selected_perm = 0;
+        if( $ibram_opts && is_array($ibram_opts) ) {
+            if(array_key_exists('bem_permanente', $ibram_opts)) {
+                $selected_perm = $ibram_opts['bem_permanente'];
+            }
+        }
+    ?>
 
     <h2><?php echo esc_html(get_admin_page_title()); ?></h2>
     <hr>
@@ -32,16 +40,8 @@
             <label for="<?php echo $this->plugin_name?>-config"> <?php esc_attr_e( 'Config collection \'Bem Permanente\'', $this->plugin_name ); ?> </label>
             <select name="<?php echo $this->plugin_name;?>[bem_permanente]" id="bem_permanente">
                 <option value=""> <?php esc_attr_e( 'All collections', $this->plugin_name ); ?> </option>
-                <?php collections_opts('socialdb_collection'); ?>
+                <?php collections_opts('socialdb_collection', $selected_perm); ?>
             </select>
-        </fieldset>
-
-        <fieldset>
-            <legend class="screen-reader-text"><span> <?php esc_attr_e( 'Remove Injected CSS for comment widget', $this->plugin_name ); ?> </span></legend>
-            <label for="<?php echo $this->plugin_name; ?>-comments_css_cleanup">
-                <input type="checkbox" id="<?php echo $this->plugin_name; ?>-comments_css_cleanup" name="<?php echo $this->plugin_name; ?>[comments_css_cleanup]" value="1"/>
-                <span><?php esc_attr_e('Remove Injected CSS for comment widget', $this->plugin_name); ?></span>
-            </label>
         </fieldset>
 
         <?php submit_button( __('Save','tainacan')  , 'primary','submit', TRUE); ?>
