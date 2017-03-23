@@ -76,6 +76,9 @@ class Ibram_Tainacan_Public {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ibram-tainacan-public.js', array( 'jquery' ), $this->version, false );
 	}
 
+    /**
+     * Adds Tainacan collection's name to class
+     */
 	public function add_ibram_body_slug($classes) {
 	    global $post;
 	    if(is_singular()) {
@@ -83,6 +86,42 @@ class Ibram_Tainacan_Public {
         }
 
         return $classes;
+    }
+
+    /**
+     * If user is trying to delete a pre-selected colleciton as 'bem permanente',
+     * it will be sent automatically for modaration.
+     */
+    public function verify_delete_object($act, $col_id) {
+	    $ibram_opts = get_option($this->plugin_name);
+
+	    $ret = true;
+        if("socialdb_collection_permission_delete_object" === $act) {
+            if($ibram_opts && is_array($ibram_opts)) {
+                if(intval($ibram_opts['bem_permanente']) === intval($col_id)) {
+                    $ret = false;
+                }
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * Moves Tainacan's item into WP Trash, instead of collection's trash
+     */
+    public function delete_item_permanent($obj_id, $col_id) {
+        $_ret = 0;
+        $ibram_opts = get_option($this->plugin_name);
+
+        if( is_int($obj_id) && $obj_id > 0) {
+            if($ibram_opts && is_array($ibram_opts)) {
+                if(intval($ibram_opts['bem_permanente']) === intval($col_id)) {
+                    $_ret = wp_update_post( ['ID' => $obj_id, 'post_status' => 'trash'] );
+                }
+            }
+        }
+
+        return $_ret;
     }
 
 }
