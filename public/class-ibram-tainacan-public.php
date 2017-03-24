@@ -116,12 +116,29 @@ class Ibram_Tainacan_Public {
         if( is_int($obj_id) && $obj_id > 0) {
             if($ibram_opts && is_array($ibram_opts)) {
                 if(intval($ibram_opts['bem_permanente']) === intval($col_id)) {
+                    $this->exclude_register_meta($obj_id);
                     $_ret = wp_update_post( ['ID' => $obj_id, 'post_status' => 'trash'] );
                 }
             }
         }
 
         return $_ret;
+    }
+
+    private function exclude_register_meta($post_id) {
+        $item_metas = get_post_meta($post_id);
+        if(is_array($item_metas)) {
+            foreach ($item_metas as $prop => $val) {
+                $pcs = explode("_", $prop);
+                if (($pcs[0] . $pcs[1]) == "socialdbproperty") {
+                    $_term = get_term($pcs[2]);
+                    $_register_term = "Número de Registro"; // TODO: check out further info over this meta
+                    if($_register_term === $_term->name) {
+                        delete_post_meta($post_id, $prop);
+                    }
+                }
+            }
+        }
     }
 
 }
