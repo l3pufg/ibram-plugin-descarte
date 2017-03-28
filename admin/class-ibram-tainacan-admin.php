@@ -48,10 +48,8 @@ class Ibram_Tainacan_Admin {
 	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
-
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -86,6 +84,7 @@ class Ibram_Tainacan_Admin {
     }
 
     public function display_ibram_setup_page() {
+        include_once( 'partials/class-ibram-tainacan-helper.php' );
         include_once( 'partials/ibram-tainacan-admin-display.php' );
 	}
 
@@ -94,9 +93,24 @@ class Ibram_Tainacan_Admin {
 
         $valid['comments_css_cleanup'] = (isset($input['comments_css_cleanup']) && !empty($input['comments_css_cleanup'])) ? 1: 0;
         $valid['bem_permanente'] = (isset( $input['bem_permanente'] ) && ! empty($input['bem_permanente'])) ? $input['bem_permanente'] : 0;
+        $valid['descarte'] = (isset( $input['descarte'] ) && ! empty($input['descarte'])) ? $input['descarte'] : 0;
+        $valid['desaparecimento'] = (isset( $input['desaparecimento'] ) && ! empty($input['desaparecimento'])) ? $input['desaparecimento'] : 0;
 
 	    return $valid;
     }
+
+    private function validate_collection_preset($user_sent, $ret_array) {
+	    $cols = ['bem_permanente', 'descarte', 'desaparecimento'];
+	    foreach ($cols as $c => $val) {
+	        if( isset($user_sent[$val]) && !empty($user_sent[$val]) ) {
+	            array_push($ret_array, $user_sent[$val]);
+	        } else {
+	            array_push($ret_array, 0);
+	        }
+	    }
+
+	    return $ret_array;
+	}
 
     public function options_update() {
 	    register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));

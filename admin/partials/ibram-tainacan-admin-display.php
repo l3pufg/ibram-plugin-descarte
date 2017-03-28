@@ -11,52 +11,35 @@
  * @package    Ibram_Tainacan
  * @subpackage Ibram_Tainacan/admin/partials
  */
-?>
 
-<!-- This file should primarily consist of HTML with a little bit of PHP. -->
+$helper = new IBRAM_Tainacan_Helper();
+?>
 
  <div class="wrap">
 
-    <?php
-        $ibram_opts = get_option($this->plugin_name);
-        $selected_perm = 0;
-        if( $ibram_opts && is_array($ibram_opts) ) {
-            if(array_key_exists('bem_permanente', $ibram_opts)) {
-                $selected_perm = $ibram_opts['bem_permanente'];
-            }
-        }
-    ?>
+    <h2> <?php echo esc_html(get_admin_page_title()); ?> </h2> <hr>
 
-    <h2><?php echo esc_html(get_admin_page_title()); ?></h2>
-    <hr>
     <form action="options.php" method="post" name="ibram_config">
-
         <?php
-        settings_fields($this->plugin_name);
-        do_settings_sections($this->plugin_name);
+        settings_fields($this->plugin_name); do_settings_sections($this->plugin_name);
+        foreach($helper->special_collections as $collec):
+            $selected_perm = $helper->get_selected_collection($collec); ?>
+            <fieldset>
+                <label for="<?php echo $this->plugin_name?>-config">
+                    <?php esc_attr_e( "Configure a coleção " .  ucfirst($collec), $this->plugin_name ); ?>
+                </label> <br>
+
+                <select name="<?php echo $this->plugin_name;?>[<?php echo $collec; ?>]" id="<?php echo $collec; ?>">
+                    <option value=""> <?php esc_attr_e( 'All collections', $this->plugin_name ); ?> </option>
+                    <?php $helper->get_selected_opts('socialdb_collection', $selected_perm); ?>
+                </select>
+            </fieldset>
+            <br>
+        <?php
+        endforeach;
+
+        submit_button( __('Save','tainacan')  , 'primary','submit', TRUE);
         ?>
-
-        <fieldset>
-            <label for="<?php echo $this->plugin_name?>-config"> <?php esc_attr_e( 'Config collection \'Bem Permanente\'', $this->plugin_name ); ?> </label>
-            <select name="<?php echo $this->plugin_name;?>[bem_permanente]" id="bem_permanente">
-                <option value=""> <?php esc_attr_e( 'All collections', $this->plugin_name ); ?> </option>
-                <?php collections_opts('socialdb_collection', $selected_perm); ?>
-            </select>
-        </fieldset>
-
-        <?php submit_button( __('Save','tainacan')  , 'primary','submit', TRUE); ?>
 
     </form>
 </div>
-
-
-<?php
-function collections_opts($post_type, $selected = 0) {
-    $post_type_object = get_post_type_object($post_type);
-    $label = $post_type_object->label;
-    $posts = get_posts(array('post_type'=> $post_type, 'post_status'=> 'publish', 'suppress_filters' => false, 'posts_per_page'=>-1));
-
-    foreach ($posts as $post) {
-        echo '<option value="', $post->ID, '"', $selected == $post->ID ? ' selected="selected"' : '', '>', $post->post_title, '</option>';
-    }
-}
