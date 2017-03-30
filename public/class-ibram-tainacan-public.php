@@ -142,26 +142,48 @@ class Ibram_Tainacan_Public {
     }
 
     public function trash_related_item($data, $obj_id) {
-    	$related = "Bens Envolvidos";
-    	$item_term = get_term_by('name', $related,'socialdb_property_type');
+        $related_id = $this->get_related_item_id($obj_id);
         $ibram_opts = get_option($this->plugin_name);
 
-        if( $obj_id > 0 && $ibram_opts && is_array($ibram_opts) ) {
+        if( $obj_id > 0 && $ibram_opts && is_array($ibram_opts) && $related_id > 0) {
             $_set_arr = [ intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
             $colecao_id = intval($obj_id);
             if( in_array( $colecao_id, $_set_arr ) ) {
-                $special_term = 'socialdb_property_' . $item_term->term_id;
+                $special_term = 'socialdb_property_' . $related_id;
                 if( key_exists($special_term, $data) ) {
                     $related = $data[$special_term];
                     if(is_array($related)) {
                         foreach($related as $itm) {
-                            wp_update_post(['ID' => $itm, 'post_status' => 'draft']);
+                           wp_update_post(['ID' => $itm, 'post_status' => 'draft']);
                         }
                     }
                 }
             }
         } // has collection id
-        
     } // trash_related_item
+
+
+    private function get_related_item_id($obj_id) {
+        global $wpdb;
+        $related = "Bens envolvidos";
+        $related_id = 0;
+        $bens_envolvidos = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$related%'");
+
+        if( is_array($bens_envolvidos) ) {
+            foreach( $bens_envolvidos as $bem_obj ) {
+                if(is_object($bem_obj)) {
+                    $_metas = get_term_meta($bem_obj->term_id);
+                    if(is_array($_metas) && key_exists('socialdb_property_collection_id', $_metas)) {
+                        $_meta_collection_id = $_metas['socialdb_property_collection_id'][0];
+                        if( $_meta_collection_id === $obj_id ) {
+                            $related_id = $bem_obj->term_id;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $related_id;
+    }
 
 }
