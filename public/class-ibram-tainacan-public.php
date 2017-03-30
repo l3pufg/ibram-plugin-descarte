@@ -141,4 +141,27 @@ class Ibram_Tainacan_Public {
         }
     }
 
+    public function trash_related_item($data, $obj_id) {
+    	$related = "Bens Envolvidos";
+    	$item_term = get_term_by('name', $related,'socialdb_property_type');
+        $ibram_opts = get_option($this->plugin_name);
+
+        if( $obj_id > 0 && $ibram_opts && is_array($ibram_opts) ) {
+            $_set_arr = [ intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
+            $colecao_id = intval($obj_id);
+            if( in_array( $colecao_id, $_set_arr ) ) {
+                $special_term = 'socialdb_property_' . $item_term->term_id;
+                if( key_exists($special_term, $data) ) {
+                    $related = $data[$special_term];
+                    if(is_array($related)) {
+                        foreach($related as $itm) {
+                            wp_update_post(['ID' => $itm, 'post_status' => 'draft']);
+                        }
+                    }
+                }
+            }
+        } // has collection id
+        
+    } // trash_related_item
+
 }

@@ -185,6 +185,7 @@ class Ibram_Tainacan {
         $this->loader->add_filter( 'body_class', $plugin_public, 'add_ibram_body_slug' );
         $this->loader->add_filter( 'tainacan_alter_permission_actions', $plugin_public, 'verify_delete_object', 10, 2 );
         $this->loader->add_filter( 'tainacan_delete_item_perm', $plugin_public, 'delete_item_permanent', 10, 2 );
+        $this->loader->add_filter( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
 	}
 
 	/**
