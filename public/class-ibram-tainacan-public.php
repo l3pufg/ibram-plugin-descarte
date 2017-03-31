@@ -1,15 +1,4 @@
 <?php
-
-/**
- * The public-facing functionality of the plugin.
- *
- * @link       https://github.com/l3pufg
- * @since      1.0.0
- *
- * @package    Ibram_Tainacan
- * @subpackage Ibram_Tainacan/public
- */
-
 /**
  * The public-facing functionality of the plugin.
  *
@@ -65,17 +54,13 @@ class Ibram_Tainacan_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-
-		/**
-		 * The Ibram_Tainacan_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ibram-tainacan-public.js', array( 'jquery' ), $this->version, false );
 	}
 
     /**
      * Adds Tainacan collection's name to class
+     *
+     * @since    1.0.0
      */
 	public function add_ibram_body_slug($classes) {
 	    global $post;
@@ -89,6 +74,11 @@ class Ibram_Tainacan_Public {
     /**
      * If user is trying to delete a pre-selected colleciton as 'bem permanente',
      * it will be sent automatically for modaration.
+     *
+     * @since    1.0.0
+     * @param    string    $act       Sent controller action
+     * @param    int       $col_id    Collection id
+     * @return   boolean   $_ret      Whether may delete or not
      */
     public function verify_delete_object($act, $col_id) {
 	    $ibram_opts = get_option($this->plugin_name);
@@ -106,6 +96,11 @@ class Ibram_Tainacan_Public {
 
     /**
      * Moves Tainacan's item into WP Trash, instead of collection's trash
+     *
+     * @since    1.0.0
+     * @param    string   $obj_id    Item id
+     * @param    array    $col_id    Collection id
+     * @return   int      $_ret      Affected post id
      */
     public function delete_item_permanent($obj_id, $col_id) {
         $_ret = 0;
@@ -130,6 +125,12 @@ class Ibram_Tainacan_Public {
         return $_ret;
     }
 
+    /**
+     * Excludes permanently this post meta
+     *
+     * @since    1.0.0
+     * @param    int    $post_id   Collection id
+     */
     private function exclude_register_meta($post_id) {
         $item_metas = get_post_meta($post_id);
         if(is_array($item_metas)) {
@@ -146,6 +147,13 @@ class Ibram_Tainacan_Public {
         }
     }
 
+    /**
+     * Sends items related to this collection to trash
+     *
+     * @param    array    $data         Collection data sent from form
+     * @param    string   $obj_id       Collection id
+     * @since    1.0.0
+     */
     public function trash_related_item($data, $obj_id) {
         $related_id = $this->get_related_item_id($obj_id);
         $ibram_opts = get_option($this->plugin_name);
@@ -168,6 +176,13 @@ class Ibram_Tainacan_Public {
         } // has collection id
     } // trash_related_item
 
+    /**
+     * Get this particular id related to this collection
+     *
+     * @since    1.0.0
+     * @param    string    $obj_id          Collection id
+     * @return   boolean   $related_id      Term meta id related to this collection
+     */
     private function get_related_item_id($obj_id) {
         global $wpdb;
         $related = "Bens envolvidos";
@@ -191,6 +206,13 @@ class Ibram_Tainacan_Public {
         return $related_id;
     }
 
+    /**
+     * Checks if collection may be restored
+     *
+     * @since    1.0.0
+     * @param    string    $item_id                  The name of this plugin.
+     * @return   boolean   $_show_edit_buttons       Whether can or not
+     */
     public function set_restore_options($item_id) {
         $ibram = get_option($this->plugin_name);
         $_show_edit_buttons = true;

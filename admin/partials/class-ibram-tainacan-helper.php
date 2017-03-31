@@ -1,16 +1,15 @@
 <?php
 /**
- * User: Rodrigo
- * Date: 28/03/2017
- * Time: 10:31
+ * This class defines helper code that is used at admin partials
+ *
+ * @since      1.0.0
+ * @package    Ibram_Tainacan_Helper
+ * @subpackage Ibram_Tainacan/admin/partials
+ * @author     Rodrigo de Oliveira <emaildorodrigolg@gmail.com>
  */
 class IBRAM_Tainacan_Helper extends Ibram_Tainacan {
 
-    public $special_collections = [
-        'bem_permanente',
-        'descarte',
-        'desaparecimento'
-    ];
+    public $special_collections = [ 'bem_permanente', 'descarte', 'desaparecimento' ];
 
     public function get_selected_collection($key) {
         $ibram_opts = get_option($this->plugin_name);

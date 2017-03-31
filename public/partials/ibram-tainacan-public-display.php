@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Provide a public-facing view for the plugin
+ * Provide a public-facing view
  *
- * @link       https://github.com/l3pufg
+ * @link       https://github.com/l3pufg/ibram-plugin-descarte
  * @since      1.0.0
  *
  * @package    Ibram_Tainacan
