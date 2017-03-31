@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== IBRAM Tainacan ===
 Contributors: https://github.com/r-guimaraes
 Donate link: https://github.com/l3pufg
 Tags: ibram, tainacan, acervos_digitais, open_source
