@@ -116,6 +116,13 @@ class Ibram_Tainacan_Public {
                 if(intval($ibram_opts['bem_permanente']) === intval($col_id)) {
                     $this->exclude_register_meta($obj_id);
                     $_ret = wp_update_post( ['ID' => $obj_id, 'post_status' => 'trash'] );
+                } else if(intval($ibram_opts['descarte']) === intval($col_id)) {
+                    $related_items = get_post_meta($obj_id, 'socialdb_related_items', true);
+                    if(is_array($related_items)) {
+                        foreach ($related_items as $itm) {
+                            wp_update_post(['ID' => $itm, 'post_status' => 'publish']);
+                        }
+                    }
                 }
             }
         }
@@ -151,6 +158,7 @@ class Ibram_Tainacan_Public {
                 if( key_exists($special_term, $data) ) {
                     $related = $data[$special_term];
                     if(is_array($related)) {
+                        update_post_meta($data['object_id'], 'socialdb_related_items', $related);
                         foreach($related as $itm) {
                            wp_update_post(['ID' => $itm, 'post_status' => 'draft']);
                         }
