@@ -1,4 +1,4 @@
-=== IBRAM Tainacan ===
+ # IBRAM Tainacan
 Contributors: https://github.com/r-guimaraes
 Donate link: https://github.com/l3pufg
 Tags: ibram, tainacan, acervos_digitais, open_source
@@ -10,19 +10,19 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Extra functionality for the Tainacan project, based at rules from IBRAM.
 
-== Description ==
+### Description
 
 In order to this plugin to work, you have to have correctly installed and configured Tainacan theme,
-available at https://github.com/l3pufg/tainacan.
+available at [Tainacan Repository] (https://github.com/l3pufg/tainacan).
 
-== Installation ==
+### Installation
 
 This section describes how to install the plugin and get it working.
 
 1. Upload `ibram-tainacan.php` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Set up the plugin under WordPress Configuration menu
+3. Set up the plugin under WordPress `Configuration` menu
 
-== Frequently Asked Questions ==
+### Frequently Asked Questions
 
 ---
