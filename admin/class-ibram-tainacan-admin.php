@@ -100,8 +100,6 @@ class Ibram_Tainacan_Admin {
      */
     public function validate($input) {
         $valid = array();
-
-        $valid['comments_css_cleanup'] = (isset($input['comments_css_cleanup']) && !empty($input['comments_css_cleanup'])) ? 1 : 0;
         $valid['bem_permanente'] = (isset($input['bem_permanente']) && !empty($input['bem_permanente'])) ? $input['bem_permanente'] : 0;
         $valid['descarte'] = (isset($input['descarte']) && !empty($input['descarte'])) ? $input['descarte'] : 0;
         $valid['desaparecimento'] = (isset($input['desaparecimento']) && !empty($input['desaparecimento'])) ? $input['desaparecimento'] : 0;
