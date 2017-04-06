@@ -20,9 +20,9 @@ $helper = new IBRAM_Tainacan_Helper();
 
     <form action="options.php" method="post" name="ibram_config">
 		<p>
-			Selecione abaixo quais serão as coleções "Bem Permanente", "Descarte" e "Desaparecimento",
+			<?php esc_attr_e("Select below the collections \"Bem Permanente\", \"Descarte\" and \"Desaparecimento\"", $this->plugin_name); ?>,
 			<br/>
-			as quais terão suas funcionalidades adaptadas às regras de negócio do IBRAM.
+            <?php esc_attr_e("Which will have their functionalities adapted to IBRAM's business rules.", $this->plugin_name); ?>
 		</p>
         <?php
         settings_fields($this->plugin_name); do_settings_sections($this->plugin_name);
@@ -32,7 +32,7 @@ $helper = new IBRAM_Tainacan_Helper();
 			?>
             <fieldset>
                 <label for="<?php echo $this->plugin_name?>-config">
-                    <?php esc_attr_e( "Configure a coleção " .  $form_title, $this->plugin_name ); ?>
+                    <?php printf( __("Configure the collection %s", $this->plugin_name),  $form_title ); ?>
                 </label> <br>
 
                 <select name="<?php echo $this->plugin_name;?>[<?php echo $collec; ?>]" id="<?php echo $collec; ?>">
@@ -44,7 +44,7 @@ $helper = new IBRAM_Tainacan_Helper();
         <?php
         endforeach;
 
-        submit_button( __('Save','tainacan')  , 'primary','submit', TRUE);
+        submit_button( __('Save', $this->plugin_name), 'primary','submit', TRUE);
         ?>
 
     </form>
