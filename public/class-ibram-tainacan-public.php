@@ -86,7 +86,8 @@ class Ibram_Tainacan_Public {
 	    $ret = true;
         if("socialdb_collection_permission_delete_object" === $act) {
             if($ibram_opts && is_array($ibram_opts)) {
-                if(intval($ibram_opts['bem_permanente']) === intval($col_id)) {
+                $_is_set_col = intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
+                if($_is_set_col) {
                     $ret = false;
                 }
             }
@@ -108,7 +109,8 @@ class Ibram_Tainacan_Public {
 
         if( is_int($obj_id) && $obj_id > 0) {
             if($ibram_opts && is_array($ibram_opts)) {
-                if(intval($ibram_opts['bem_permanente']) === intval($col_id)) {
+                $_is_set_col = intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
+                if($_is_set_col) {
                     $this->exclude_register_meta($obj_id);
                     $_ret = wp_update_post( ['ID' => $obj_id, 'post_status' => 'trash'] );
                 } else if(intval($ibram_opts['descarte']) === intval($col_id)) {
@@ -158,8 +160,8 @@ class Ibram_Tainacan_Public {
         $related_id = $this->get_related_item_id($obj_id);
         $ibram_opts = get_option($this->plugin_name);
 
-        if( $obj_id > 0 && $ibram_opts && is_array($ibram_opts) && $related_id > 0) {
-            $_set_arr = [ intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
+        if($obj_id > 0 && $ibram_opts && is_array($ibram_opts) && $related_id > 0) {
+            $_set_arr = [intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
             $colecao_id = intval($obj_id);
             if( in_array( $colecao_id, $_set_arr ) ) {
                 $special_term = 'socialdb_property_' . $related_id;
@@ -168,13 +170,77 @@ class Ibram_Tainacan_Public {
                     if(is_array($related)) {
                         update_post_meta($data['object_id'], 'socialdb_related_items', $related);
                         foreach($related as $itm) {
-                           wp_update_post(['ID' => $itm, 'post_status' => 'draft']);
+                            /*
+                             * === Keep this comment for now ===
+                             * wp_update_post(['ID' => $itm, 'post_status' => 'draft']);
+                             *
+                             * TODO: Change the way to get the correct ID
+                             */
+                            $situacao_bens_term_id = 2312;
+                            $terms = wp_get_post_terms($itm, 'socialdb_category_type');
+                            $_item_terms = [];
+                            foreach ($terms as $tm) {
+                                array_push($_item_terms, $tm->term_id);
+                            }
+
+                            $cat_children = $this->get_tainacan_category_children($situacao_bens_term_id);
+                            $previous_set_id = 0;
+                            $available_children = [];
+                            foreach ($cat_children['ids'] as $ch) {
+                                $_int_id_ = intval($ch);
+                                if( in_array($_int_id_, $_item_terms) ) {
+                                    $previous_set_id = $_int_id_;
+                                } else {
+                                    array_push($available_children, $_int_id_);
+                                }
+                            }
+
+                            wp_remove_object_terms($itm, get_term_by('id', $previous_set_id, 'socialdb_category_type')->term_id, 'socialdb_category_type');
+
+                            $_localizado_index = 0;
+                            $_nao_localizado_index = 0;
+                            $_registro_excluido_index = 0 ;
+                            foreach ($cat_children['labels'] as $ind => $labl) {
+                                if( strpos($labl, 'Registro Excluído') !== false ) {
+                                    $_registro_excluido_index = $ind;
+                                } else if(strpos($labl, 'Não') !== false) {
+                                    $_nao_localizado_index = $ind;
+                                }
+                            }
+                            
+                            $pointer = 0;
+                            /* TODO: also improve this part */
+                            // se é descarte ou desaparecimento
+                            if( $_set_arr[0] == $colecao_id ) {
+                                $pointer = $cat_children['ids'][$_registro_excluido_index];
+                            }  else if ($_set_arr[1] == $colecao_id) {
+                                $pointer = $cat_children['ids'][$_nao_localizado_index];
+                            }
+
+                            wp_set_object_terms($itm, get_term_by('id', $pointer, 'socialdb_category_type')->term_id, 'socialdb_category_type', true);
                         }
                     }
                 }
             }
         } // has collection id
     } // trash_related_item
+
+
+    public function get_tainacan_category_children($parent_id) {
+        global $wpdb;
+        $data = [];
+        $wp_term_taxonomy = $wpdb->prefix . "term_taxonomy";
+        $query = "SELECT * FROM $wpdb->terms t INNER JOIN $wp_term_taxonomy tt ON t.term_id = tt.term_id
+				WHERE tt.parent = {$parent_id}  ORDER BY tt.count DESC,t.name ASC";
+        $result = $wpdb->get_results($query);
+        if ($result && !empty($result)) {
+            foreach ($result as $term) {
+                $data['ids'][] = $term->term_id;
+                $data['labels'][] = $term->name;
+            }
+        }
+        return $data;
+    }
 
     /**
      * Get this particular id related to this collection
