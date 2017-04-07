@@ -1,3 +1,30 @@
-/**
- * All of the CSS for your admin-specific functionality
- */
+.ibram_options {
+    float: left;
+    width: 33%;
+}
+
+.ibram_options label {
+    font-weight: 500;
+    padding-left: 3px;
+}
+
+.ibram_config_sep {
+    float: left;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.ibram_divider {
+    width: 100%;
+    float: left;
+    color: #F1F1F1;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #fafafa;
+}
+
+.ibram-btn-container {
+    float: left;
+    width: 100%;
+}

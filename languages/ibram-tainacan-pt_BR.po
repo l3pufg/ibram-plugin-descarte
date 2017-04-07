@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Package Name\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-06 14:51-0300\n"
-"PO-Revision-Date: 2017-04-06 14:51-0300\n"
+"POT-Creation-Date: 2017-04-07 14:04-0300\n"
+"PO-Revision-Date: 2017-04-07 14:04-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt\n"
@@ -25,29 +25,31 @@ msgstr ""
 msgid "Settings"
 msgstr "Configurações"
 
-#: admin/partials/ibram-tainacan-admin-display.php:23
+#: admin/partials/class-ibram-tainacan-helper.php:39
+msgid "And here, collections  \"Descarte\" and \"Desaparecimento\""
+msgstr "E aqui, as coleções \"Descarte\" e \"Desaparecimento\""
+
+#: admin/partials/ibram-tainacan-admin-display.php:24
 msgid ""
-"Select below the collections \"Bem Permanente\", \"Descarte\" and "
-"\"Desaparecimento\""
+"Select below the collections \"Bem Permanente\", \"Bem Bibliográfico\" and "
+"\"Bem Arquivístico\""
 msgstr ""
-"Selecione abaixo quais serão as coleções \"Bem Permanente\", \"Descarte\" e "
-"\"Desaparecimento\""
+"Selecione abaixo as coleções \"Bem Permanente\", \"Bem Bibliográfico\" e "
+"\"Bem Arquivístico\""
 
-#: admin/partials/ibram-tainacan-admin-display.php:25
-msgid ""
-"Which will have their functionalities adapted to IBRAM's business rules."
-msgstr ""
-"as quais terão suas funcionalidades adaptadas às regras de negócio do IBRAM."
-
-#: admin/partials/ibram-tainacan-admin-display.php:35
-#, php-format
-msgid "Configure the collection %s"
-msgstr "Configure a coleção %s"
-
-#: admin/partials/ibram-tainacan-admin-display.php:39
+#: admin/partials/ibram-tainacan-admin-display.php:41
 msgid "All collections"
 msgstr "Todas as coleções"
 
-#: admin/partials/ibram-tainacan-admin-display.php:47
+#: admin/partials/ibram-tainacan-admin-display.php:52
 msgid "Save"
 msgstr "Salvar"
+
+#~ msgid ""
+#~ "Which will have their functionalities adapted to IBRAM's business rules."
+#~ msgstr ""
+#~ "as quais terão suas funcionalidades adaptadas às regras de negócio do "
+#~ "IBRAM."
+
+#~ msgid "Configure the collection %s"
+#~ msgstr "Configure a coleção %s"

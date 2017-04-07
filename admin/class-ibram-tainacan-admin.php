@@ -101,6 +101,8 @@ class Ibram_Tainacan_Admin {
     public function validate($input) {
         $valid = array();
         $valid['bem_permanente'] = (isset($input['bem_permanente']) && !empty($input['bem_permanente'])) ? $input['bem_permanente'] : 0;
+        $valid['bibliografico'] = (isset($input['bibliografico']) && !empty($input['bibliografico'])) ? $input['bibliografico'] : 0;
+        $valid['arquivistico'] = (isset($input['arquivistico']) && !empty($input['arquivistico'])) ? $input['arquivistico'] : 0;
         $valid['descarte'] = (isset($input['descarte']) && !empty($input['descarte'])) ? $input['descarte'] : 0;
         $valid['desaparecimento'] = (isset($input['desaparecimento']) && !empty($input['desaparecimento'])) ? $input['desaparecimento'] : 0;
 

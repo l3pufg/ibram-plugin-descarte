@@ -9,7 +9,7 @@
  */
 class IBRAM_Tainacan_Helper extends Ibram_Tainacan {
 
-    public $special_collections = [ 'bem_permanente', 'descarte', 'desaparecimento' ];
+    public $special_collections = [ 'bem_permanente', 'bibliografico', 'arquivistico', 'descarte', 'desaparecimento' ];
 
     public function get_selected_collection($key) {
         $ibram_opts = get_option($this->plugin_name);
@@ -30,6 +30,16 @@ class IBRAM_Tainacan_Helper extends Ibram_Tainacan {
         $posts = get_posts(array('post_type'=> $post_type, 'post_status'=> 'publish', 'suppress_filters' => false, 'posts_per_page'=>-1));
         foreach ($posts as $post) {
             echo '<option value="', $post->ID, '"', $selected == $post->ID ? ' selected="selected"' : '', '>', $post->post_title, '</option>';
+        }
+    }
+
+    public function set_divider($index) {
+        if(2 === $index) {
+            echo "<div class='ibram_config_sep'><p class='ibram_divider'>.</p>";
+            esc_attr_e("And here, collections  \"Descarte\" and \"Desaparecimento\"", $this->plugin_name);
+            echo "</div>";
+        } else if (4 === $index) {
+            echo "<br><br>";
         }
     }
 }
