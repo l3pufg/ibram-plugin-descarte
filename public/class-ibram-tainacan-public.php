@@ -117,7 +117,39 @@ class Ibram_Tainacan_Public {
                     $related_items = get_post_meta($obj_id, 'socialdb_related_items', true);
                     if(is_array($related_items)) {
                         foreach ($related_items as $itm) {
-                            wp_update_post(['ID' => $itm, 'post_status' => 'publish']);
+                            /*
+                             * === Keep this comment for now ===
+                             * wp_update_post(['ID' => $itm, 'post_status' => 'publish']);
+                             *
+                             * TODO: Change the way to get the correct ID
+                             */
+                            $situacao_bens_term_id = 2312;
+                            $terms = wp_get_post_terms($itm, 'socialdb_category_type');
+                            $_item_terms = [];
+                            foreach ($terms as $tm) {
+                                array_push($_item_terms, $tm->term_id);
+                            }
+
+                            $cat_children = $this->get_tainacan_category_children($situacao_bens_term_id);
+                            $previous_set_id = 0;
+                            foreach ($cat_children['ids'] as $ch) {
+                                $_int_id_ = intval($ch);
+                                if( in_array($_int_id_, $_item_terms) ) {
+                                    $previous_set_id = $_int_id_;
+                                }
+                            }
+
+                            wp_remove_object_terms($itm, get_term_by('id', $previous_set_id, 'socialdb_category_type')->term_id, 'socialdb_category_type');
+
+                            $_localizado_index = 0;
+                            foreach ($cat_children['labels'] as $ind => $labl) {
+                                if( strpos($labl, '1 - Localizado') !== false ) {
+                                    $_localizado_index = $ind;
+                                }
+                            }
+                            $pointer = $cat_children['ids'][$_localizado_index];
+
+                            wp_set_object_terms($itm, get_term_by('id', $pointer, 'socialdb_category_type')->term_id, 'socialdb_category_type', true);
                         }
                     }
                 }
@@ -197,7 +229,6 @@ class Ibram_Tainacan_Public {
 
                             wp_remove_object_terms($itm, get_term_by('id', $previous_set_id, 'socialdb_category_type')->term_id, 'socialdb_category_type');
 
-                            $_localizado_index = 0;
                             $_nao_localizado_index = 0;
                             $_registro_excluido_index = 0 ;
                             foreach ($cat_children['labels'] as $ind => $labl) {
@@ -207,7 +238,7 @@ class Ibram_Tainacan_Public {
                                     $_nao_localizado_index = $ind;
                                 }
                             }
-                            
+
                             $pointer = 0;
                             /* TODO: also improve this part */
                             // se é descarte ou desaparecimento
