@@ -308,6 +308,7 @@ class Ibram_Tainacan_Public {
                         }
 
                         wp_set_object_terms($itm, ((int) $option_id), 'socialdb_category_type', true);
+                        print "<script>console.log('Item added');</script>";
                     }
                 }
             }
