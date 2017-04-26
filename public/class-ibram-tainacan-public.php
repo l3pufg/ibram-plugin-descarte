@@ -374,8 +374,6 @@ class Ibram_Tainacan_Public {
                                 {
                                     $ids[$name] = $data[$index];
                                 }
-
-                                //$ids[$name] = get_post_meta($item_id, "socialdb_property_".$value);
                             }
                         }
                         else if(key_exists('socialdb_property_collection_id', $_metas))
@@ -435,6 +433,7 @@ class Ibram_Tainacan_Public {
     {
         if($is_root)
         {
+
             $category_root_id = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
             $ids = get_term_meta($category_root_id, "socialdb_category_property_id");
         }else
