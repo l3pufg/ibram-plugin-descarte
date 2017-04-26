@@ -198,22 +198,19 @@ class Ibram_Tainacan_Public {
         $related = $this->get_related_item_id($obj_id, $data["object_id"], $data);
         $ibram_opts = get_option($this->plugin_name);
 
-        if($obj_id > 0 && $ibram_opts && is_array($ibram_opts) && ($related > 0 && is_array($related)))
+        if($obj_id > 0 && $ibram_opts && is_array($ibram_opts) && is_array($related))
         {
             $_set_arr = [intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
             $colecao_id = intval($obj_id);
             if($obj_id > 0 || in_array( $colecao_id, $_set_arr ) ) {
+
                 if(is_array($related)) {
                     update_post_meta($data['object_id'], 'socialdb_related_items', $related);
                     foreach ($related as $main_index => $itm) {
-                        /*
-                         * === Keep this comment for now ===
-                         * wp_update_post(['ID' => $itm, 'post_status' => 'draft']);
-                         *
-                         * TODO: Change the way to get the correct ID
-                         */
+
 
                         $situacao_bens_term_id = $this->get_category_id($ibram_opts[$main_index], "Situação");
+
                         $terms = wp_get_post_terms($itm, 'socialdb_category_type');
 
                         $_item_terms = [];
@@ -269,6 +266,11 @@ class Ibram_Tainacan_Public {
                         wp_set_object_terms($itm, $option_id, 'socialdb_category_type', true);
 
                         $modo_option_id = $this->get_category_id($colecao_id, "Modo");
+                        if(!$modo_option_id)
+                        {
+                            $modo_option_id = $this->get_category_id($colecao_id, "Tipo de ocorrência");
+                        }
+
                         $children_modos = $this->get_tainacan_category_children($modo_option_id);
                         $selected_category = $data['selected_categories'];
                         foreach ($children_modos['ids'] as $index => $id)
@@ -302,6 +304,15 @@ class Ibram_Tainacan_Public {
                                 break;
                             case 'Tranferência':
                                 $option_id = $sub_option_children_refactored['Tranferido'];
+                                break;
+                            case 'Extraviado':
+                                $option_id = $sub_option_children_refactored['Extraviado'];
+                                break;
+                            case 'Furtado':
+                                $option_id = $sub_option_children_refactored['Furtado'];
+                                break;
+                            case 'Roubado':
+                                $option_id = $sub_option_children_refactored['Roubado'];
                                 break;
                         }
 
@@ -341,13 +352,12 @@ class Ibram_Tainacan_Public {
         $related = "Bens envolvidos";
         $related_id = 0;
         $bens_envolvidos = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$related%'");
+
         if( is_array($bens_envolvidos) ) {
             foreach( $bens_envolvidos as $bem_obj ) {
                 if(is_object($bem_obj))
                 {
                     $_metas = get_term_meta($bem_obj->term_id);
-                    $related_id = [];
-                    $related_id['comp'] = $bem_obj->term_id;
 
                     if(is_array($_metas))
                     {
@@ -372,16 +382,8 @@ class Ibram_Tainacan_Public {
 
                                 if($index = $this->cmp("socialdb_property_".$bem_obj->term_id."_".$value."_0", $data ))
                                 {
-                                    $ids[$name] = $data[$index];
+                                    $related_id[$name] = $data[$index][0];
                                 }
-                            }
-                        }
-                        else if(key_exists('socialdb_property_collection_id', $_metas))
-                        {
-                            $_meta_collection_id = $_metas['socialdb_property_collection_id'][0];
-                            if( $_meta_collection_id === $obj_id )
-                            {
-                                $related_id = $bem_obj->term_id;
                             }
                         }
                     }
@@ -389,11 +391,6 @@ class Ibram_Tainacan_Public {
             }
         }
 
-        foreach ($ids as $index => $id)
-        {
-            if($id)
-                $related_id[$index] = $id[0];
-        }
         return $related_id;
     }
 
