@@ -195,7 +195,7 @@ class Ibram_Tainacan_Public {
      */
     public function trash_related_item($data, $obj_id)
     {
-        $related = $this->get_related_item_id($obj_id, $data["object_id"], $data);
+        $related = $this->get_related_item_id($data);
         print "Related: \n";
         print_r($related);
         $ibram_opts = get_option($this->plugin_name);
@@ -438,26 +438,34 @@ class Ibram_Tainacan_Public {
      * @param    string    $obj_id          Collection id
      * @return   boolean   $related_id      Term meta id related to this collection
      */
-    private function get_related_item_id($obj_id, $item_id, $data) {
+    private function get_related_item_id($data) {
         global $wpdb;
         $related = "Bens envolvidos";
         $related_id = 0;
         $bens_envolvidos = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$related%'");
 
+        print "Bens envolvidos: \n";
+        print_r($bens_envolvidos);
+
         if( is_array($bens_envolvidos) ) {
             foreach( $bens_envolvidos as $bem_obj ) {
                 if(is_object($bem_obj))
                 {
+                    print "Bem Objeto: \n";
+                    print_r($bem_obj);
                     $_metas = get_term_meta($bem_obj->term_id);
 
                     if(is_array($_metas))
                     {
+                        print "Metas é array\n";
                         if(key_exists("socialdb_property_compounds_properties_id", $_metas))
                         {
                             $related_id = [];
                             $sub_properties = $_metas['socialdb_property_compounds_properties_id'][0];
 
                             $sub_properties = explode(",", $sub_properties);
+                            print "Sub-properties: \n";
+                            print_r($sub_properties);
                             foreach ($sub_properties as $index => $value)
                             {
                                 $name = get_term_by('id',$value,'socialdb_property_type')->name;
@@ -474,6 +482,7 @@ class Ibram_Tainacan_Public {
                                 if($index = $this->cmp("socialdb_property_".$bem_obj->term_id."_".$value."_0", $data ))
                                 {
                                     $related_id[$name] = $data[$index][0];
+                                    print "related_id[name]\n";
                                 }
                             }
                         }
