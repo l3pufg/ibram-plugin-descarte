@@ -196,6 +196,8 @@ class Ibram_Tainacan_Public {
     public function trash_related_item($data, $obj_id)
     {
         $related = $this->get_related_item_id($obj_id, $data["object_id"], $data);
+        print "Related: \n";
+        print_r($related);
         $ibram_opts = get_option($this->plugin_name);
 
         if($obj_id > 0 && $ibram_opts && is_array($ibram_opts) && is_array($related))
@@ -203,13 +205,13 @@ class Ibram_Tainacan_Public {
             $_set_arr = [intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
             $colecao_id = intval($obj_id);
             if($obj_id > 0 || in_array( $colecao_id, $_set_arr ) ) {
-
+                print "Collection ID: $colecao_id\n";
                 if(is_array($related)) {
                     update_post_meta($data['object_id'], 'socialdb_related_items', $related);
                     foreach ($related as $main_index => $itm) {
 
-
                         $situacao_bens_term_id = $this->get_category_id($ibram_opts[$main_index], "Situação");
+                        print "Situação: $situacao_bens_term_id\n";
 
                         //Save last option
                         $situacao_bens_saved = $this->last_option_saved($itm, $situacao_bens_term_id);
@@ -267,7 +269,7 @@ class Ibram_Tainacan_Public {
                         }
 
                         $option_id = get_term_by('id', $pointer, 'socialdb_category_type')->term_id;
-
+                        print "Option ID: $option_id\n";
                         wp_set_object_terms($itm, $option_id, 'socialdb_category_type', true);
 
                         $modo_option_id = $this->get_category_id($colecao_id, "Modo");
@@ -390,8 +392,7 @@ class Ibram_Tainacan_Public {
         {
             $situation = get_post_meta($id, "socialdb_previously_situation", true);
             $situation_type = get_post_meta($id, "socialdb_previously_situation_type", true);
-//            print $id."\n";
-//            print $situation ." $situation_type\n";
+
             if($situation)
             {
                 $situacao_bens_term_id = $this->get_category_id($ibram_opts[$index], "Situação");
