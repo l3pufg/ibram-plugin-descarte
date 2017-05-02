@@ -482,7 +482,12 @@ class Ibram_Tainacan_Public {
                                 if($index = $this->cmp("socialdb_property_".$bem_obj->term_id."_".$value."_0", $data ))
                                 {
                                     $related_id[$name] = $data[$index][0];
-                                    print "related_id[name]\n";
+                                    
+                                    print "related_id[name] = ".$related_id[$name]."\n";
+                                    print "Index = $index\n";
+                                    print "Name = $name\n";
+                                    print "Data index: \n";
+                                    print_r($data[$index]);
                                 }
                             }
                         }
