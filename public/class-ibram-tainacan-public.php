@@ -214,7 +214,7 @@ class Ibram_Tainacan_Public {
                         //Save last option
                         $situacao_bens_saved = $this->last_option_saved($itm, $situacao_bens_term_id);
                         add_post_meta($itm, "socialdb_previously_situation", $situacao_bens_saved);
-
+                        
                         $terms = wp_get_post_terms($itm, 'socialdb_category_type');
 
                         $_item_terms = [];
@@ -295,6 +295,8 @@ class Ibram_Tainacan_Public {
 
                         $sub_option_children = $this->get_tainacan_category_children($sub_option_id);
 
+                        $this->remove_last_option($sub_option_children['ids'], $itm);
+
                         $sub_option_children_refactored = array();
                         foreach ($sub_option_children['labels'] as $index => $label)
                         {
@@ -325,7 +327,7 @@ class Ibram_Tainacan_Public {
                                 $option_id = $sub_option_children_refactored['Roubado'];
                                 break;
                         }
-
+                        
                         wp_set_object_terms($itm, ((int) $option_id), 'socialdb_category_type', true);
                     }
                 }
@@ -348,13 +350,67 @@ class Ibram_Tainacan_Public {
         return false;
     }
 
+    public function remove_last_option($sub_options_children_ids, $post_id)
+    {
+        $terms = wp_get_post_terms($post_id, 'socialdb_category_type');
+
+        $_item_terms = [];
+        foreach ($terms as $tm) {
+            array_push($_item_terms, $tm->term_id);
+        }
+
+        $previous_set_ids = [];
+        $available_children = [];
+        foreach ($sub_options_children_ids as $ch)
+        {
+            $_int_id_ = intval($ch);
+            if (in_array($_int_id_, $_item_terms))
+            {
+                $previous_set_ids[] = $_int_id_;
+            }
+            else
+            {
+                array_push($available_children, $_int_id_);
+            }
+        }
+
+        foreach ($previous_set_ids as $previous_set_id)
+        {
+            wp_remove_object_terms($post_id, get_term_by('id', $previous_set_id, 'socialdb_category_type')->term_id, 'socialdb_category_type');
+        }
+    }
+    
     public function restore_descarted_item($descard_id)
     {
+        $ibram_opts = get_option($this->plugin_name);
         $related_items = get_post_meta($descard_id, 'socialdb_related_items');
+        $related_items = $related_items[0];
+
         foreach ($related_items as $index => $id)
         {
             $situation = get_post_meta($id, "socialdb_previously_situation", true);
             $situation_type = get_post_meta($id, "socialdb_previously_situation_type", true);
+//            print $id."\n";
+//            print $situation ." $situation_type\n";
+            if($situation)
+            {
+                $situacao_bens_term_id = $this->get_category_id($ibram_opts[$index], "Situação");
+                $cat_children = $this->get_tainacan_category_children($situacao_bens_term_id);
+                $this->remove_last_option($cat_children['ids'], $id);
+
+                wp_set_object_terms($id, ((int)$situation), 'socialdb_category_type', true);
+            }
+
+            if($situation_type)
+            {
+                $option_id = get_term_by('id', $situation, 'socialdb_category_type')->term_id;
+                $sub_option_id = $this->get_category_id($option_id, "Tipo de situação", false);
+                $sub_option_children = $this->get_tainacan_category_children($sub_option_id);
+
+                $this->remove_last_option($sub_option_children['ids'], $id);
+
+                wp_set_object_terms($id, ((int) $situation_type), 'socialdb_category_type', true);
+            }
         }
     }
     
