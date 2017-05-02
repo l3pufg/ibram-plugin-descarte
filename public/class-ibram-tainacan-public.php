@@ -496,6 +496,8 @@ class Ibram_Tainacan_Public {
             }
         }
 
+        print "Related ID:\n";
+        print_r($related_id);
         return $related_id;
     }
 
