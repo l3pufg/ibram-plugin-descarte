@@ -159,9 +159,10 @@ class Ibram_Tainacan {
 
 		/*
 		 * Not used by now
-		    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
+
 		    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		*/
+        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
 		
         // Filters
