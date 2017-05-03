@@ -171,6 +171,7 @@ class Ibram_Tainacan {
         $this->loader->add_filter( 'tainacan_delete_item_perm', $plugin_public, 'delete_item_permanent', 10, 2 );
         $this->loader->add_filter( 'tainacan_show_restore_options', $plugin_public, 'set_restore_options');
 		$this->loader->add_filter( 'tainacan_restore_descarted_item', $plugin_public, 'restore_descarted_item', 10, 1);
+		$this->loader->add_filter( 'tainacan_show_reason_modal', $plugin_public, 'show_reason_modal', 10, 1);
 	}
 
 	/**

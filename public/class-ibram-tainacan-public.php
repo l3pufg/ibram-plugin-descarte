@@ -501,6 +501,47 @@ class Ibram_Tainacan_Public {
         return $_show_edit_buttons;
     }
 
+    public function show_reason_modal()
+    {
+        ?>
+        <div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="reasonModal" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header"><!--Cabeçalho-->
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only"><?php _e('Close', 'tainacan'); ?></span>
+                        </button>
+
+                        <h4 class="modal-title"> Razão</h4>
+                    </div><!--Fim cabeçalho-->
+
+                    <div class="modal-body">
+                        <div class="form-group" id="formmarc">
+                            <form>
+                                <label for="MARC">Qual o motivo dessa operação?</label>
+                                <textarea class="form-control" rows="8" id="reasontext" name="reasontext"></textarea>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer"><!--Rodapé-->
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                            <?php _e('Cancel', 'tainacan'); ?>
+                        </button>
+
+                        <button type="button" class="btn btn-primary" id="btnRemoveReason" data-id-exclude=""
+                                onclick="exclude_item()">
+                            <?php _e('Remover', 'tainacan'); ?>
+                        </button>
+
+                    </div><!--Fim rodapé-->
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
     public function cmp($needle, $data)
     {
         foreach($data as $index => $value)
