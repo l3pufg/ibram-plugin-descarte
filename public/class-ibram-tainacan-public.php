@@ -491,9 +491,9 @@ class Ibram_Tainacan_Public {
     public function set_restore_options($item_id) {
         $ibram = get_option($this->plugin_name);
         $_show_edit_buttons = true;
-
+        
         if(is_array($ibram)) {
-            if($item_id == $ibram['bem_permanente'] || $item_id == $ibram['descarte']) {
+            if($item_id == $ibram['desaparecimento'] || $item_id == $ibram['descarte']) {
                 $_show_edit_buttons = false;
             }
         }
