@@ -441,7 +441,7 @@ class Ibram_Tainacan_Public {
     private function get_related_item_id($data) {
         global $wpdb;
         $related = "Bens envolvidos";
-        $related_id = 0;
+        $related_id = [];
         $bens_envolvidos = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$related%'");
 
         print "Bens envolvidos: \n";
@@ -460,7 +460,6 @@ class Ibram_Tainacan_Public {
                         print "Metas é array\n";
                         if(key_exists("socialdb_property_compounds_properties_id", $_metas))
                         {
-                            $related_id = [];
                             $sub_properties = $_metas['socialdb_property_compounds_properties_id'][0];
 
                             $sub_properties = explode(",", $sub_properties);
@@ -498,7 +497,10 @@ class Ibram_Tainacan_Public {
 
         print "Related ID:\n";
         print_r($related_id);
-        return $related_id;
+        
+        if(!empty($related_id))
+            return $related_id;
+        else return false;
     }
 
     /**
