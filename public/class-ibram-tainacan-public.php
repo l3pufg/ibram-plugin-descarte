@@ -513,13 +513,12 @@ class Ibram_Tainacan_Public {
                             <span class="sr-only"><?php _e('Close', 'tainacan'); ?></span>
                         </button>
 
-                        <h4 class="modal-title"> Razão</h4>
+                        <h4 class="modal-title">Motivo</h4>
                     </div><!--Fim cabeçalho-->
 
                     <div class="modal-body">
                         <div class="form-group" id="formmarc">
                             <form>
-                                <label for="MARC">Qual o motivo dessa operação?</label>
                                 <textarea class="form-control" rows="8" id="reasontext" name="reasontext"></textarea>
                             </form>
                         </div>
