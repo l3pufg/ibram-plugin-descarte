@@ -196,8 +196,6 @@ class Ibram_Tainacan_Public {
     public function trash_related_item($data, $obj_id)
     {
         $related = $this->get_related_item_id($data);
-        print "Related: \n";
-        print_r($related);
         $ibram_opts = get_option($this->plugin_name);
 
         if($obj_id > 0 && $ibram_opts && is_array($ibram_opts) && is_array($related))
@@ -205,13 +203,11 @@ class Ibram_Tainacan_Public {
             $_set_arr = [intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
             $colecao_id = intval($obj_id);
             if($obj_id > 0 || in_array( $colecao_id, $_set_arr ) ) {
-                print "Collection ID: $colecao_id\n";
                 if(is_array($related)) {
                     update_post_meta($data['object_id'], 'socialdb_related_items', $related);
                     foreach ($related as $main_index => $itm) {
 
                         $situacao_bens_term_id = $this->get_category_id($ibram_opts[$main_index], "Situação");
-                        print "Situação: $situacao_bens_term_id\n";
 
                         //Save last option
                         $situacao_bens_saved = $this->last_option_saved($itm, $situacao_bens_term_id);
@@ -269,7 +265,6 @@ class Ibram_Tainacan_Public {
                         }
 
                         $option_id = get_term_by('id', $pointer, 'socialdb_category_type')->term_id;
-                        print "Option ID: $option_id\n";
                         wp_set_object_terms($itm, $option_id, 'socialdb_category_type', true);
 
                         $modo_option_id = $this->get_category_id($colecao_id, "Modo");
@@ -444,27 +439,19 @@ class Ibram_Tainacan_Public {
         $related_id = [];
         $bens_envolvidos = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$related%'");
 
-        print "Bens envolvidos: \n";
-        print_r($bens_envolvidos);
-
         if( is_array($bens_envolvidos) ) {
             foreach( $bens_envolvidos as $bem_obj ) {
                 if(is_object($bem_obj))
                 {
-                    print "Bem Objeto: \n";
-                    print_r($bem_obj);
                     $_metas = get_term_meta($bem_obj->term_id);
 
                     if(is_array($_metas))
                     {
-                        print "Metas é array\n";
                         if(key_exists("socialdb_property_compounds_properties_id", $_metas))
                         {
                             $sub_properties = $_metas['socialdb_property_compounds_properties_id'][0];
 
                             $sub_properties = explode(",", $sub_properties);
-                            print "Sub-properties: \n";
-                            print_r($sub_properties);
                             foreach ($sub_properties as $index => $value)
                             {
                                 $name = get_term_by('id',$value,'socialdb_property_type')->name;
@@ -481,12 +468,6 @@ class Ibram_Tainacan_Public {
                                 if($index = $this->cmp("socialdb_property_".$bem_obj->term_id."_".$value."_0", $data ))
                                 {
                                     $related_id[$name] = $data[$index][0];
-                                    
-                                    print "related_id[name] = ".$related_id[$name]."\n";
-                                    print "Index = $index\n";
-                                    print "Name = $name\n";
-                                    print "Data index: \n";
-                                    print_r($data[$index]);
                                 }
                             }
                         }
@@ -495,9 +476,6 @@ class Ibram_Tainacan_Public {
             }
         }
 
-        print "Related ID:\n";
-        print_r($related_id);
-        
         if(!empty($related_id))
             return $related_id;
         else return false;
