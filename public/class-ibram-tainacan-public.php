@@ -393,30 +393,32 @@ class Ibram_Tainacan_Public {
         $ibram_opts = get_option($this->plugin_name);
         $related_items = get_post_meta($descard_id, 'socialdb_related_items');
         $related_items = $related_items[0];
-
-        foreach ($related_items as $index => $id)
+        if(is_array($related_items))
         {
-            $situation = get_post_meta($id, "socialdb_previously_situation", true);
-            $situation_type = get_post_meta($id, "socialdb_previously_situation_type", true);
-
-            if($situation)
+            foreach ($related_items as $index => $id)
             {
-                $situacao_bens_term_id = $this->get_category_id($ibram_opts[$index], "Situação");
-                $cat_children = $this->get_tainacan_category_children($situacao_bens_term_id);
-                $this->remove_last_option($cat_children['ids'], $id);
+                $situation = get_post_meta($id, "socialdb_previously_situation", true);
+                $situation_type = get_post_meta($id, "socialdb_previously_situation_type", true);
 
-                wp_set_object_terms($id, ((int)$situation), 'socialdb_category_type', true);
-            }
+                if($situation)
+                {
+                    $situacao_bens_term_id = $this->get_category_id($ibram_opts[$index], "Situação");
+                    $cat_children = $this->get_tainacan_category_children($situacao_bens_term_id);
+                    $this->remove_last_option($cat_children['ids'], $id);
 
-            if($situation_type)
-            {
-                $option_id = get_term_by('id', $situation, 'socialdb_category_type')->term_id;
-                $sub_option_id = $this->get_category_id($option_id, "Tipo de situação", false);
-                $sub_option_children = $this->get_tainacan_category_children($sub_option_id);
+                    wp_set_object_terms($id, ((int)$situation), 'socialdb_category_type', true);
+                }
 
-                $this->remove_last_option($sub_option_children['ids'], $id);
+                if($situation_type)
+                {
+                    $option_id = get_term_by('id', $situation, 'socialdb_category_type')->term_id;
+                    $sub_option_id = $this->get_category_id($option_id, "Tipo de situação", false);
+                    $sub_option_children = $this->get_tainacan_category_children($sub_option_id);
 
-                wp_set_object_terms($id, ((int) $situation_type), 'socialdb_category_type', true);
+                    $this->remove_last_option($sub_option_children['ids'], $id);
+
+                    wp_set_object_terms($id, ((int) $situation_type), 'socialdb_category_type', true);
+                }
             }
         }
     }
@@ -491,7 +493,7 @@ class Ibram_Tainacan_Public {
             return $related_id;
         else return false;
     }
-
+    
     /**
      * Checks if collection may be restored
      *
