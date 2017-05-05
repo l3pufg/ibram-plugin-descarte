@@ -553,6 +553,17 @@ class Ibram_Tainacan_Public {
         </div>
         <?php
     }
+    
+    public function is_bens_collection($collection_id){
+        $ibram = get_option($this->plugin_name);
+        
+        if(is_array($ibram)) {
+            if(isset($ibram['bens']) && $collection_id == $ibram['bens']) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public function cmp($needle, $data)
     {

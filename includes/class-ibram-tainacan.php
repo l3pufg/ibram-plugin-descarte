@@ -159,19 +159,19 @@ class Ibram_Tainacan {
 
 		/*
 		 * Not used by now
-
 		    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		*/
-        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-        $this->loader->add_action( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
-		
-        // Filters
-        $this->loader->add_filter( 'body_class', $plugin_public, 'add_ibram_body_slug' );
-        $this->loader->add_filter( 'tainacan_alter_permission_actions', $plugin_public, 'verify_delete_object', 10, 2 );
-        $this->loader->add_filter( 'tainacan_delete_item_perm', $plugin_public, 'delete_item_permanent', 10, 2 );
-        $this->loader->add_filter( 'tainacan_show_restore_options', $plugin_public, 'set_restore_options');
-		$this->loader->add_filter( 'tainacan_restore_descarted_item', $plugin_public, 'restore_descarted_item', 10, 1);
-		$this->loader->add_filter( 'tainacan_show_reason_modal', $plugin_public, 'show_reason_modal', 10, 1);
+                $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
+                $this->loader->add_action( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
+
+                // Filters
+                $this->loader->add_filter( 'body_class', $plugin_public, 'add_ibram_body_slug' );
+                $this->loader->add_filter( 'tainacan_alter_permission_actions', $plugin_public, 'verify_delete_object', 10, 2 );
+                $this->loader->add_filter( 'tainacan_delete_item_perm', $plugin_public, 'delete_item_permanent', 10, 2 );
+                $this->loader->add_filter( 'tainacan_show_restore_options', $plugin_public, 'set_restore_options');
+                $this->loader->add_filter( 'tainacan_restore_descarted_item', $plugin_public, 'restore_descarted_item', 10, 1);
+                $this->loader->add_filter( 'tainacan_show_reason_modal', $plugin_public, 'show_reason_modal', 10, 1);
+                $this->loader->add_filter( 'tainacan_is_bens_collection', $plugin_public, 'is_bens_collection', 10, 1);
 	}
 
 	/**

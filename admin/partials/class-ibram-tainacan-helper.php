@@ -9,7 +9,7 @@
  */
 class IBRAM_Tainacan_Helper extends Ibram_Tainacan {
 
-    public $special_collections = [ 'bem_permanente', 'bibliografico', 'arquivistico', 'descarte', 'desaparecimento' ];
+    public $special_collections = [ 'bem_permanente', 'bibliografico', 'arquivistico', 'descarte', 'desaparecimento', 'bens'];
 
     public function get_selected_collection($key) {
         $ibram_opts = get_option($this->plugin_name);
