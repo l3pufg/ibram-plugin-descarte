@@ -117,19 +117,30 @@ class Ibram_Tainacan_Public {
                 } else if(intval($ibram_opts['descarte']) === intval($col_id)) {
                     $related_items = get_post_meta($obj_id, 'socialdb_related_items', true);
                     if(is_array($related_items)) {
+                        $situacao_bens_term_id = 2312;
+                        global $wpdb;
+                        $situacao_bem = "Situação - Bem";
+                        $bens_envolvidos_arr = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$situacao_bem%'");
+
+                        if(is_array($bens_envolvidos_arr)) {
+                            foreach($bens_envolvidos_arr as $selectable) {
+                                $_title_arr = explode(" ", $selectable->name);
+                                if( count($_title_arr) == 3 && $_title_arr[0] === "Situação" && $_title_arr[2] === "Bem" ) {
+                                    $situacao_bens_term_id = intval($selectable->term_id);
+                                }
+                            }
+                        }
+
                         foreach ($related_items as $itm) {
                             /*
                              * === Keep this comment for now ===
                              * wp_update_post(['ID' => $itm, 'post_status' => 'publish']);
                              *
-                             * TODO: Change the way to get the correct ID
                              */
-                            $situacao_bens_term_id = 2312;
                             $terms = wp_get_post_terms($itm, 'socialdb_category_type');
                             $_item_terms = [];
 
-                            foreach ($terms as $tm)
-                            {
+                            foreach ($terms as $tm) {
                                 array_push($_item_terms, $tm->term_id);
                             }
 
