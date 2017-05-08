@@ -594,16 +594,20 @@ class Ibram_Tainacan_Public {
     public function filter_search_alter($home_search_term,$collection_id) {
         $ibram = get_option($this->plugin_name);
         $indexes = [];
+        $categories = [];
         if(is_array($ibram)) {
             foreach ($ibram as $index => $value) {
                 if(in_array($index, ['bem_permanente','temporario','bibliografico','arquivistico'])){
                     $indexes[] = $value;
+                    $categories[] = get_post_meta($value, 'socialdb_collection_object_type', true);
                 }
             }
         }
         ?>
         <input type="hidden" name="collection_bens" value="<?php echo implode(',', $indexes) ?>">
+        <input type="hidden" name="categories" value="<?php echo implode(',', $categories); ?>">
         <input type="hidden" name="advanced_search_collection" value="0">
+        <input type="hidden" name="collection_id" value="0">
         <div id="container_filtros" class="row">
             <ol class="breadcrumb">
                 <li><a href="<?php echo site_url(); ?>"> <?php _e('Repository', 'tainacan') ?> </a></li>
