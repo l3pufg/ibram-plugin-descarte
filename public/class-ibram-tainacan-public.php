@@ -54,7 +54,7 @@ class Ibram_Tainacan_Public {
      * @since    1.0.0
      */
     public function enqueue_scripts() {
-        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ibram-tainacan-public.js', array( 'jquery' ), $this->version, false );
+        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ibram-tainacan-public.js');
     }
 
     /**
@@ -551,6 +551,83 @@ class Ibram_Tainacan_Public {
                 </div>
             </div>
         </div>
+        <?php
+    }
+    
+    public function alter_home_page() {
+        ?>
+        <div id="main_part" class="home">
+            <div class="row container-fluid">
+                <div class="project-info">
+                    <center>
+                        <h1> <?php bloginfo('name') ?> </h1>
+                        <h3> <?php bloginfo('description') ?> </h3>
+                    </center>
+                </div>
+                <div id="searchBoxIndex" class="col-md-3 col-sm-12 center">
+                    <form id="formSearchCollectionsIbram" role="search">
+                        <div class="input-group search-collection search-home">
+                            <input style="color:white;" type="text" class="form-control" name="search_collections" id="search_collections" onfocus="changeBoxWidth(this)" placeholder="<?php _e('Find', 'tainacan') ?>"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button"  onclick="showIbramSearch($('#search_collections').val());"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                 </div>
+            </div>
+        <?php
+    }
+    
+    public function limit_search_collections() {
+        $ibram = get_option($this->plugin_name);
+        $indexes = [];
+        if(is_array($ibram)) {
+            foreach ($ibram as $index => $value) {
+                if(in_array($index, ['bem_permanente','temporario','bibliografico','arquivistico'])){
+                    $indexes[] = get_post_meta($value, 'socialdb_collection_object_type', true);
+                }
+            }
+        }
+        return $indexes;
+    }
+    
+    public function filter_search_alter($home_search_term,$collection_id) {
+        $ibram = get_option($this->plugin_name);
+        $indexes = [];
+        if(is_array($ibram)) {
+            foreach ($ibram as $index => $value) {
+                if(in_array($index, ['bem_permanente','temporario','bibliografico','arquivistico'])){
+                    $indexes[] = $value;
+                }
+            }
+        }
+        ?>
+        <input type="hidden" name="collection_bens" value="<?php echo implode(',', $indexes) ?>">
+        <input type="hidden" name="advanced_search_collection" value="0">
+        <div id="container_filtros" class="row">
+            <ol class="breadcrumb">
+                <li><a href="<?php echo site_url(); ?>"> <?php _e('Repository', 'tainacan') ?> </a></li>
+                <li><a href="#" onclick="backToMainPageSingleItem()"><?php echo get_post($collection_id)->post_title; ?></a></li>
+                <li class="active"><?php echo 'Pesquisar bens'; ?></li>
+            </ol>
+            <div class="quadrante">
+                    <h3><?php echo 'Pesquisar bens'; ?>
+                        <a class="btn btn-default pull-right" href="<?php echo site_url(); ?>" ><?php _e('Back', 'tainacan'); ?></a> 
+                    </h3>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <input type="text" class="form-control" name="advanced_search_general" id="advanced_search_general"
+                                   value="<?php print_r(empty($home_search_term) ? "" : $home_search_term ); ?>"
+                                   placeholder="<?php _e('Search in all metadata', 'tainacan'); ?>">
+                        </div>
+                        <button type="submit" class="col-md-2 btn btn-success pull-right">
+                            <?php _e('Find', 'tainacan') ?>
+                        </button>
+                    </div>
+                    <br>
+            </div>          
+        </div>     
         <?php
     }
     

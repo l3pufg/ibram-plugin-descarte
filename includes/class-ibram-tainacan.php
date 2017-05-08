@@ -156,14 +156,14 @@ class Ibram_Tainacan {
 	private function define_public_hooks() {
 
 		$plugin_public = new Ibram_Tainacan_Public( $this->get_plugin_name(), $this->get_version() );
-
-		/*
-		 * Not used by now
-		    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-		*/
+                $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
                 $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
                 $this->loader->add_action( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
-
+                
+                //alter home page
+                $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
+                
+                $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
                 // Filters
                 $this->loader->add_filter( 'body_class', $plugin_public, 'add_ibram_body_slug' );
                 $this->loader->add_filter( 'tainacan_alter_permission_actions', $plugin_public, 'verify_delete_object', 10, 2 );
@@ -172,6 +172,7 @@ class Ibram_Tainacan {
                 $this->loader->add_filter( 'tainacan_restore_descarted_item', $plugin_public, 'restore_descarted_item', 10, 1);
                 $this->loader->add_filter( 'tainacan_show_reason_modal', $plugin_public, 'show_reason_modal', 10, 1);
                 $this->loader->add_filter( 'tainacan_is_bens_collection', $plugin_public, 'is_bens_collection', 10, 1);
+                $this->loader->add_filter( 'limit_search_collections', $plugin_public, 'limit_search_collections', 10, 1);
 	}
 
 	/**

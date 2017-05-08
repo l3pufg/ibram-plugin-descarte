@@ -105,7 +105,7 @@ class Ibram_Tainacan_Admin {
         $valid['arquivistico'] = (isset($input['arquivistico']) && !empty($input['arquivistico'])) ? $input['arquivistico'] : 0;
         $valid['descarte'] = (isset($input['descarte']) && !empty($input['descarte'])) ? $input['descarte'] : 0;
         $valid['desaparecimento'] = (isset($input['desaparecimento']) && !empty($input['desaparecimento'])) ? $input['desaparecimento'] : 0;
-        $valid['bens'] = (isset($input['bens']) && !empty($input['bens'])) ? $input['bens'] : 0;
+        $valid['temporario'] = (isset($input['temporario']) && !empty($input['temporario'])) ? $input['temporario'] : 0;
 
         return $valid;
     }
