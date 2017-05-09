@@ -530,9 +530,9 @@ class Ibram_Tainacan_Public {
                     </div><!--Fim cabeçalho-->
 
                     <div class="modal-body">
-                        <div class="form-group" id="formmarc">
+                        <div class="form-group">
                             <form>
-                                <textarea class="form-control" rows="8" id="reasontext" name="reasontext"></textarea>
+                                <textarea class="form-control" rows="8" id="reasontext" name="reasontext" onkeyup="change_button()"></textarea>
                             </form>
                         </div>
                     </div>
@@ -542,8 +542,8 @@ class Ibram_Tainacan_Public {
                             <?php _e('Cancel', 'tainacan'); ?>
                         </button>
 
-                        <button type="button" class="btn btn-primary" id="btnRemoveReason" data-id-exclude=""
-                                onclick="exclude_item()">
+                            <button type="button" class="btn btn-primary" id="btnRemoveReason" data-id-exclude=""
+                                onclick="exclude_item()" disabled>
                             <?php _e('Remover', 'tainacan'); ?>
                         </button>
 
