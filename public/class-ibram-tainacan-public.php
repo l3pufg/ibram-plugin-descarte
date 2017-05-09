@@ -635,6 +635,10 @@ class Ibram_Tainacan_Public {
         <?php
     }
     
+    public function alter_image_index_container() {
+        return plugin_dir_url( __FILE__ ).'/img/03_expo.jpg';
+    }
+    
     public function is_bens_collection($collection_id){
         $ibram = get_option($this->plugin_name);
         
