@@ -78,9 +78,10 @@ class Ibram_Tainacan_Public {
      * @since    1.0.0
      * @param    string    $act       Sent controller action
      * @param    int       $col_id    Collection id
+     * @param    int       $evt_id    Related event's id
      * @return   boolean   $_ret      Whether may delete or not
      */
-    public function verify_delete_object($act, $col_id) {
+    public function verify_delete_object($act, $col_id, $evt_id) {
         $ibram_opts = get_option($this->plugin_name);
 
         $ret = true;
