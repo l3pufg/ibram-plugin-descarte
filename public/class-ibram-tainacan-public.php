@@ -286,10 +286,12 @@ class Ibram_Tainacan_Public {
                         }
 
                         $children_modos = $this->get_tainacan_category_children($modo_option_id);
-                        $selected_category = $data['selected_categories'];
+                        //$selected_category = $data['selected_categories'];
+                        $selected_category = wp_get_object_terms(intval($data['object_id']), 'socialdb_category_type', array('fields' => 'ids') );
                         foreach ($children_modos['ids'] as $index => $id)
                         {
-                            if($selected_category == $id)
+                            //if($selected_category == $id)
+                            if($selected_category && is_array($selected_category) && in_array($id, $selected_category))
                             {
                                 $selected_category_name = $children_modos['labels'][$index];
                                 break;
@@ -336,8 +338,7 @@ class Ibram_Tainacan_Public {
                                 $option_id = $sub_option_children_refactored['Roubado'];
                                 break;
                         }
-                        
-                        wp_set_object_terms($itm, ((int) $option_id), 'socialdb_category_type', true);
+                        wp_set_object_terms($itm, array(intval($option_id)), 'socialdb_category_type', true);
                     }
                 }
             }
@@ -478,11 +479,19 @@ class Ibram_Tainacan_Public {
                                 {
                                     $name = "bem_permanente";
                                 }
-
-                                if($index = $this->cmp("socialdb_property_".$bem_obj->term_id."_".$value."_0", $data ))
-                                {
-                                    $related_id[$name] = $data[$index][0];
+                                //busco todos os valores ja inseridos inclusie de outras cardinalidades
+                                $positions = $this->getValueCompound($data['object_id'], $bem_obj->term_id);
+                                if($positions){
+                                    foreach ($positions as $position) {
+                                        if(isset($position[$value])){
+                                            $related_id[$name] = $position[$value]['values'][0];
+                                        }
+                                    }
                                 }
+//                                if($index = $this->cmp("socialdb_property_".$bem_obj->term_id."_".$value."_0", $data ))
+//                                {
+//                                    $related_id[$name] = $data[$index][0];
+//                                }
                             }
                         }
                     }
@@ -493,6 +502,16 @@ class Ibram_Tainacan_Public {
         if(!empty($related_id))
             return $related_id;
         else return false;
+    }
+    
+    private function getValueCompound($item_id,$property_id){
+        $meta = get_post_meta($item_id, 'socialdb_property_helper_' . $property_id, true);
+        if ($meta && $meta != '') {
+            $array = unserialize($meta);
+            return $array;
+        } else {
+            return false;
+        }
     }
     
     /**
