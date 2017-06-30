@@ -626,6 +626,28 @@ class Ibram_Tainacan_Public {
         }
         return false;
     }
+    
+    public function verify_property_visibility($property,$collection_id) {
+        $ibram = get_option($this->plugin_name);
+        if(is_array($ibram)) {
+            if($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento') {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    
+    public function verify_cancel_property_visibility($property,$object_id) {
+        $ibram = get_option($this->plugin_name);
+        $collection_id = $property['metas']['socialdb_property_collection_id'];
+        if(is_array($ibram)) {
+            if($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento' && get_post($object_id)->post_status == 'publish') {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public function cmp($needle, $data)
     {
