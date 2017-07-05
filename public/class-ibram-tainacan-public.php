@@ -648,6 +648,31 @@ class Ibram_Tainacan_Public {
         }
         return false;
     }
+    
+    public function set_collection_delete_object($data) {
+        $ibram = get_option($this->plugin_name);
+        $collection_id = $data['socialdb_event_collection_id'];
+        $item_id = $data['socialdb_event_object_item_id'];
+        if(strpos(get_post($collection_id)->post_title, 'Conjuntos')!==false){
+            $category_root = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
+            $properties = get_term_meta($category_root, 'socialdb_category_property_id');
+            if($properties){
+                foreach ($properties as $property) {
+                    if(strpos(get_term_by('id',$property,'socialdb_property_type')->name, 'Bens')!==false){
+                        $values = get_post_meta($item_id, 'socialdb_property_'.$property);
+                        if($values && is_array($values) && count(array_filter($values)) > 0 ){
+                            $data['msg'] = __('There are items selected in this set','tainacan');
+                            $data['type'] = 'info';
+                            $data['title'] = __('Atention','tainacan');
+                            return $data;
+                        }
+                       // break;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     public function cmp($needle, $data)
     {

@@ -165,6 +165,7 @@ class Ibram_Tainacan {
                 
                 $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
                 // Filters
+                $this->loader->add_filter( 'tainacan_alter_delete_object', $plugin_public, 'set_collection_delete_object',10, 1 );
                 $this->loader->add_filter( 'skip_compound_property', $plugin_public, 'verify_cancel_property_visibility',10, 2 );
                 $this->loader->add_filter( 'property_is_visible', $plugin_public, 'verify_property_visibility',10, 2 );
                 $this->loader->add_filter( 'body_class', $plugin_public, 'add_ibram_body_slug' );
