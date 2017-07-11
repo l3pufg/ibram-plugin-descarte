@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The public-facing functionality of the plugin.
  *
@@ -33,7 +34,7 @@ class Ibram_Tainacan_Public {
      * @param      string    $plugin_name       The name of the plugin.
      * @param      string    $version    The version of this plugin.
      */
-    public function __construct( $plugin_name, $version ) {
+    public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
         $this->ibram_options = get_option($this->plugin_name);
@@ -45,7 +46,7 @@ class Ibram_Tainacan_Public {
      * @since    1.0.0
      */
     public function enqueue_styles() {
-        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/ibram-tainacan-public.css', array(), $this->version, 'all' );
+        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/ibram-tainacan-public.css', array(), $this->version, 'all');
     }
 
     /**
@@ -54,7 +55,7 @@ class Ibram_Tainacan_Public {
      * @since    1.0.0
      */
     public function enqueue_scripts() {
-        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ibram-tainacan-public.js');
+        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/ibram-tainacan-public.js');
     }
 
     /**
@@ -64,7 +65,7 @@ class Ibram_Tainacan_Public {
      */
     public function add_ibram_body_slug($classes) {
         global $post;
-        if(is_singular()) {
+        if (is_singular()) {
             $classes[] = $post->post_name;
         }
 
@@ -85,10 +86,10 @@ class Ibram_Tainacan_Public {
         $ibram_opts = get_option($this->plugin_name);
 
         $ret = true;
-        if("socialdb_collection_permission_delete_object" === $act) {
-            if($ibram_opts && is_array($ibram_opts)) {
+        if ("socialdb_collection_permission_delete_object" === $act) {
+            if ($ibram_opts && is_array($ibram_opts)) {
                 $_is_set_col = intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
-                if($_is_set_col) {
+                if ($_is_set_col) {
                     $ret = false;
                 }
             }
@@ -108,25 +109,25 @@ class Ibram_Tainacan_Public {
         $_ret = 0;
         $ibram_opts = get_option($this->plugin_name);
 
-        if( is_int($obj_id) && $obj_id > 0) {
-            if($ibram_opts && is_array($ibram_opts)) {
+        if (is_int($obj_id) && $obj_id > 0) {
+            if ($ibram_opts && is_array($ibram_opts)) {
 
                 $_is_set_col = intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
-                if($_is_set_col) {
+                if ($_is_set_col) {
                     $this->exclude_register_meta($obj_id);
-                    $_ret = wp_update_post( ['ID' => $obj_id, 'post_status' => 'trash'] );
-                } else if(intval($ibram_opts['descarte']) === intval($col_id)) {
+                    $_ret = wp_update_post(['ID' => $obj_id, 'post_status' => 'trash']);
+                } else if (intval($ibram_opts['descarte']) === intval($col_id)) {
                     $related_items = get_post_meta($obj_id, 'socialdb_related_items', true);
-                    if(is_array($related_items)) {
+                    if (is_array($related_items)) {
                         $situacao_bens_term_id = 2312;
                         global $wpdb;
                         $situacao_bem = "Situação - Bem";
                         $bens_envolvidos_arr = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$situacao_bem%'");
 
-                        if(is_array($bens_envolvidos_arr)) {
-                            foreach($bens_envolvidos_arr as $selectable) {
+                        if (is_array($bens_envolvidos_arr)) {
+                            foreach ($bens_envolvidos_arr as $selectable) {
                                 $_title_arr = explode(" ", $selectable->name);
-                                if( count($_title_arr) == 3 && $_title_arr[0] === "Situação" && $_title_arr[2] === "Bem" ) {
+                                if (count($_title_arr) == 3 && $_title_arr[0] === "Situação" && $_title_arr[2] === "Bem") {
                                     $situacao_bens_term_id = intval($selectable->term_id);
                                 }
                             }
@@ -149,7 +150,7 @@ class Ibram_Tainacan_Public {
                             $previous_set_id = 0;
                             foreach ($cat_children['ids'] as $ch) {
                                 $_int_id_ = intval($ch);
-                                if( in_array($_int_id_, $_item_terms) ) {
+                                if (in_array($_int_id_, $_item_terms)) {
                                     $previous_set_id = $_int_id_;
                                 }
                             }
@@ -158,7 +159,7 @@ class Ibram_Tainacan_Public {
 
                             $_localizado_index = 0;
                             foreach ($cat_children['labels'] as $ind => $labl) {
-                                if( strpos($labl, '1 - Localizado') !== false ) {
+                                if (strpos($labl, '1 - Localizado') !== false) {
                                     $_localizado_index = $ind;
                                 }
                             }
@@ -182,13 +183,13 @@ class Ibram_Tainacan_Public {
      */
     private function exclude_register_meta($post_id) {
         $item_metas = get_post_meta($post_id);
-        if(is_array($item_metas)) {
+        if (is_array($item_metas)) {
             foreach ($item_metas as $prop => $val) {
                 $pcs = explode("_", $prop);
                 if (($pcs[0] . $pcs[1]) == "socialdbproperty") {
                     $_term = get_term($pcs[2]);
                     $_register_term = "Número de Registro"; // TODO: check out further info over this meta
-                    if($_register_term === $_term->name) {
+                    if ($_register_term === $_term->name) {
                         delete_post_meta($post_id, $prop);
                     }
                 }
@@ -207,11 +208,11 @@ class Ibram_Tainacan_Public {
         $related = $this->get_related_item_id($data);
         $ibram_opts = get_option($this->plugin_name);
 
-        if($obj_id > 0 && $ibram_opts && is_array($ibram_opts) && is_array($related)) {
+        if ($obj_id > 0 && $ibram_opts && is_array($ibram_opts) && is_array($related)) {
             $_set_arr = [intval($ibram_opts['descarte']), intval($ibram_opts['desaparecimento'])];
             $colecao_id = intval($obj_id);
-            if($obj_id > 0 || in_array( $colecao_id, $_set_arr ) ) {
-                if(is_array($related)) {
+            if ($obj_id > 0 || in_array($colecao_id, $_set_arr)) {
+                if (is_array($related)) {
                     update_post_meta($data['object_id'], 'socialdb_related_items', $related);
                     foreach ($related as $main_index => $itm) {
                         $situacao_bens_term_id = $this->get_category_id($ibram_opts[$main_index], "Situação");
@@ -219,7 +220,7 @@ class Ibram_Tainacan_Public {
                         // Save last option
                         $situacao_bens_saved = $this->last_option_saved($itm, $situacao_bens_term_id);
                         add_post_meta($itm, "socialdb_previously_situation", $situacao_bens_saved);
-                        
+
                         $terms = wp_get_post_terms($itm, 'socialdb_category_type');
 
                         $_item_terms = [];
@@ -262,14 +263,14 @@ class Ibram_Tainacan_Public {
                         wp_set_object_terms($itm, [$option_id], 'socialdb_category_type', true);
 
                         $modo_option_id = $this->get_category_id($colecao_id, "Modo");
-                        if(!$modo_option_id) {
+                        if (!$modo_option_id) {
                             $modo_option_id = $this->get_category_id($colecao_id, "Tipo de ocorrência");
                         }
 
                         $children_modos = $this->get_tainacan_category_children($modo_option_id);
-                        $selected_category = wp_get_object_terms(intval($data['object_id']), 'socialdb_category_type', array('fields' => 'ids') );
+                        $selected_category = wp_get_object_terms(intval($data['object_id']), 'socialdb_category_type', array('fields' => 'ids'));
                         foreach ($children_modos['ids'] as $index => $id) {
-                            if($selected_category && is_array($selected_category) && in_array($id, $selected_category)) {
+                            if ($selected_category && is_array($selected_category) && in_array($id, $selected_category)) {
                                 $selected_category_name = $children_modos['labels'][$index];
                                 break;
                             }
@@ -318,14 +319,16 @@ class Ibram_Tainacan_Public {
                 }
             }
         } // has collection id
-    } // trash_related_item
+    }
+
+// trash_related_item
 
     public function last_option_saved($post_id, $option_id) {
-        $terms = wp_get_post_terms( $post_id, 'socialdb_category_type' );
-        if($terms && is_array($terms)){
+        $terms = wp_get_post_terms($post_id, 'socialdb_category_type');
+        if ($terms && is_array($terms)) {
             foreach ($terms as $term) {
                 $hierarchy = get_ancestors($term->term_id, 'socialdb_category_type');
-                if(is_array($hierarchy) && in_array($option_id, $hierarchy)){
+                if (is_array($hierarchy) && in_array($option_id, $hierarchy)) {
                     return $term->term_id;
                 }
             }
@@ -357,25 +360,25 @@ class Ibram_Tainacan_Public {
             wp_remove_object_terms($post_id, get_term_by('id', $previous_set_id, 'socialdb_category_type')->term_id, 'socialdb_category_type');
         }
     }
-    
+
     public function restore_descarted_item($descard_id) {
         $ibram_opts = get_option($this->plugin_name);
         $related_items = get_post_meta($descard_id, 'socialdb_related_items');
         $related_items = $related_items[0];
-        if(is_array($related_items)) {
+        if (is_array($related_items)) {
             foreach ($related_items as $index => $id) {
                 $situation = get_post_meta($id, "socialdb_previously_situation", true);
                 $situation_type = get_post_meta($id, "socialdb_previously_situation_type", true);
 
-                if($situation) {
+                if ($situation) {
                     $situacao_bens_term_id = $this->get_category_id($ibram_opts[$index], "Situação");
                     $cat_children = $this->get_tainacan_category_children($situacao_bens_term_id);
                     $this->remove_last_option($cat_children['ids'], $id);
 
-                    wp_set_object_terms($id, ((int)$situation), 'socialdb_category_type', true);
+                    wp_set_object_terms($id, ((int) $situation), 'socialdb_category_type', true);
                 }
 
-                if($situation_type) {
+                if ($situation_type) {
                     $option_id = get_term_by('id', $situation, 'socialdb_category_type')->term_id;
                     $sub_option_id = $this->get_category_id($option_id, "Tipo de situação", false);
                     $sub_option_children = $this->get_tainacan_category_children($sub_option_id);
@@ -387,7 +390,7 @@ class Ibram_Tainacan_Public {
             }
         }
     }
-    
+
     public function get_tainacan_category_children($parent_id) {
         global $wpdb;
         $data = [];
@@ -417,33 +420,33 @@ class Ibram_Tainacan_Public {
         $related_id = [];
         $bens_envolvidos = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$related%'");
 
-        if( is_array($bens_envolvidos) ) {
-            foreach( $bens_envolvidos as $bem_obj ) {
-                if(is_object($bem_obj)) {
+        if (is_array($bens_envolvidos)) {
+            foreach ($bens_envolvidos as $bem_obj) {
+                if (is_object($bem_obj)) {
                     $_metas = get_term_meta($bem_obj->term_id);
 
-                    if(is_array($_metas)) {
-                        if(key_exists("socialdb_property_compounds_properties_id", $_metas)) {
+                    if (is_array($_metas)) {
+                        if (key_exists("socialdb_property_compounds_properties_id", $_metas)) {
                             $sub_properties = $_metas['socialdb_property_compounds_properties_id'][0];
 
                             $sub_properties = explode(",", $sub_properties);
                             foreach ($sub_properties as $index => $value) {
-                                $name = get_term_by('id',$value,'socialdb_property_type')->name;
+                                $name = get_term_by('id', $value, 'socialdb_property_type')->name;
                                 $name = $this->remove_accents($name);
                                 $name = strtolower($name);
                                 $name = end(explode(" ", $name));
                                 $name = substr($name, 0, -1);
 
-                                if(strcmp($name, "museologico") == 0) {
+                                if (strcmp($name, "museologico") == 0) {
                                     $name = "bem_permanente";
                                 }
                                 // Busco todos os valores ja inseridos inclusie de outras cardinalidades
                                 $positions = $this->getValueCompound($data['object_id'], $bem_obj->term_id);
-                                if($positions){
+                                if ($positions) {
                                     foreach ($positions as $position) {
-                                        if(isset($position[$value])){
-                                            $meta_row = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_id = ".$position[$value]['values'][0]);
-                                            if(is_array($meta_row)){
+                                        if (isset($position[$value])) {
+                                            $meta_row = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_id = " . $position[$value]['values'][0]);
+                                            if (is_array($meta_row)) {
                                                 $related_id[$name] = $meta_row[0]->meta_value;
                                             }
                                         }
@@ -456,12 +459,13 @@ class Ibram_Tainacan_Public {
             }
         }
 
-        if(!empty($related_id))
+        if (!empty($related_id))
             return $related_id;
-        else return false;
+        else
+            return false;
     }
-    
-    private function getValueCompound($item_id,$property_id){
+
+    private function getValueCompound($item_id, $property_id) {
         $meta = get_post_meta($item_id, 'socialdb_property_helper_' . $property_id, true);
         if ($meta && $meta != '') {
             $array = unserialize($meta);
@@ -470,7 +474,7 @@ class Ibram_Tainacan_Public {
             return false;
         }
     }
-    
+
     /**
      * Checks if collection may be restored
      *
@@ -481,18 +485,17 @@ class Ibram_Tainacan_Public {
     public function set_restore_options($item_id) {
         $ibram = get_option($this->plugin_name);
         $_show_edit_buttons = true;
-        
-        if(is_array($ibram)) {
-            if($item_id == $ibram['desaparecimento'] || $item_id == $ibram['descarte']) {
+
+        if (is_array($ibram)) {
+            if ($item_id == $ibram['desaparecimento'] || $item_id == $ibram['descarte']) {
                 $_show_edit_buttons = false;
             }
         }
-        
+
         return $_show_edit_buttons;
     }
 
-    public function show_reason_modal()
-    {
+    public function show_reason_modal() {
         ?>
         <div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="reasonModal" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
@@ -516,12 +519,12 @@ class Ibram_Tainacan_Public {
 
                     <div class="modal-footer"><!--Rodapé-->
                         <button type="button" class="btn btn-danger" data-dismiss="modal">
-                            <?php _e('Cancel', 'tainacan'); ?>
+        <?php _e('Cancel', 'tainacan'); ?>
                         </button>
 
-                            <button type="button" class="btn btn-primary" id="btnRemoveReason" data-id-exclude=""
+                        <button type="button" class="btn btn-primary" id="btnRemoveReason" data-id-exclude=""
                                 onclick="exclude_item()" disabled>
-                            <?php _e('Remover', 'tainacan'); ?>
+        <?php _e('Remover', 'tainacan'); ?>
                         </button>
 
                     </div><!--Fim rodapé-->
@@ -530,7 +533,7 @@ class Ibram_Tainacan_Public {
         </div>
         <?php
     }
-    
+
     public function alter_home_page() {
         ?>
         <div id="main_part" class="home">
@@ -550,48 +553,48 @@ class Ibram_Tainacan_Public {
                             </span>
                         </div>
                     </form>
-                 </div>
+                </div>
             </div>
-        <?php
-    }
-    
-    public function limit_search_collections() {
-        $ibram = get_option($this->plugin_name);
-        $indexes = [];
-        if(is_array($ibram)) {
-            foreach ($ibram as $index => $value) {
-                if(in_array($index, ['bem_permanente','temporario','bibliografico','arquivistico'])){
-                    $indexes[] = get_post_meta($value, 'socialdb_collection_object_type', true);
+            <?php
+        }
+
+        public function limit_search_collections() {
+            $ibram = get_option($this->plugin_name);
+            $indexes = [];
+            if (is_array($ibram)) {
+                foreach ($ibram as $index => $value) {
+                    if (in_array($index, ['bem_permanente', 'temporario', 'bibliografico', 'arquivistico'])) {
+                        $indexes[] = get_post_meta($value, 'socialdb_collection_object_type', true);
+                    }
                 }
             }
+            return $indexes;
         }
-        return $indexes;
-    }
-    
-    public function filter_search_alter($home_search_term,$collection_id) {
-        $ibram = get_option($this->plugin_name);
-        $indexes = [];
-        $categories = [];
-        if(is_array($ibram)) {
-            foreach ($ibram as $index => $value) {
-                if(in_array($index, ['bem_permanente','temporario','bibliografico','arquivistico'])){
-                    $indexes[] = $value;
-                    $categories[] = get_post_meta($value, 'socialdb_collection_object_type', true);
+
+        public function filter_search_alter($home_search_term, $collection_id) {
+            $ibram = get_option($this->plugin_name);
+            $indexes = [];
+            $categories = [];
+            if (is_array($ibram)) {
+                foreach ($ibram as $index => $value) {
+                    if (in_array($index, ['bem_permanente', 'temporario', 'bibliografico', 'arquivistico'])) {
+                        $indexes[] = $value;
+                        $categories[] = get_post_meta($value, 'socialdb_collection_object_type', true);
+                    }
                 }
             }
-        }
-        ?>
-        <input type="hidden" name="collection_bens" value="<?php echo implode(',', $indexes) ?>">
-        <input type="hidden" name="categories" value="<?php echo implode(',', $categories); ?>">
-        <input type="hidden" name="advanced_search_collection" value="0">
-        <input type="hidden" name="collection_id" value="0">
-        <div id="container_filtros" class="row">
-            <ol class="breadcrumb">
-                <li><a href="<?php echo site_url(); ?>"> <?php _e('Repository', 'tainacan') ?> </a></li>
-                <li><a href="#" onclick="backToMainPageSingleItem()"><?php echo get_post($collection_id)->post_title; ?></a></li>
-                <li class="active"><?php echo 'Pesquisar bens'; ?></li>
-            </ol>
-            <div class="quadrante">
+            ?>
+            <input type="hidden" name="collection_bens" value="<?php echo implode(',', $indexes) ?>">
+            <input type="hidden" name="categories" value="<?php echo implode(',', $categories); ?>">
+            <input type="hidden" name="advanced_search_collection" value="0">
+            <input type="hidden" name="collection_id" value="0">
+            <div id="container_filtros" class="row">
+                <ol class="breadcrumb">
+                    <li><a href="<?php echo site_url(); ?>"> <?php _e('Repository', 'tainacan') ?> </a></li>
+                    <li><a href="#" onclick="backToMainPageSingleItem()"><?php echo get_post($collection_id)->post_title; ?></a></li>
+                    <li class="active"><?php echo 'Pesquisar bens'; ?></li>
+                </ol>
+                <div class="quadrante">
                     <h3><?php echo 'Pesquisar bens'; ?>
                         <a class="btn btn-default pull-right" href="<?php echo site_url(); ?>" ><?php _e('Back', 'tainacan'); ?></a> 
                     </h3>
@@ -603,117 +606,111 @@ class Ibram_Tainacan_Public {
                                    placeholder="<?php _e('Search in all metadata', 'tainacan'); ?>">
                         </div>
                         <button type="submit" class="col-md-2 btn btn-success pull-right">
-                            <?php _e('Find', 'tainacan') ?>
+        <?php _e('Find', 'tainacan') ?>
                         </button>
                     </div>
                     <br>
-            </div>          
-        </div>     
-        <?php
-    }
-    
-    public function alter_image_index_container() {
-        return plugin_dir_url( __FILE__ ).'/img/03_expo.jpg';
-    }
-    
-    public function is_bens_collection($collection_id){
-        $ibram = get_option($this->plugin_name);
-        
-        if(is_array($ibram)) {
-            if(isset($ibram['bens']) && $collection_id == $ibram['bens']) {
-                return true;
-            }
+                </div>          
+            </div>     
+            <?php
         }
-        return false;
-    }
-    
-    public function verify_property_visibility($property,$collection_id) {
-        $ibram = get_option($this->plugin_name);
-        if(is_array($ibram)) {
-            if($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento') {
-                return false;
-            }
+
+        public function alter_image_index_container() {
+            return plugin_dir_url(__FILE__) . '/img/03_expo.jpg';
         }
-        return true;
-    }
-    
-    
-    public function verify_cancel_property_visibility($property,$object_id) {
-        $ibram = get_option($this->plugin_name);
-        $collection_id = $property['metas']['socialdb_property_collection_id'];
-        if(is_array($ibram)) {
-            if($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento' && get_post($object_id)->post_status == 'publish') {
-                return true;
+
+        public function is_bens_collection($collection_id) {
+            $ibram = get_option($this->plugin_name);
+
+            if (is_array($ibram)) {
+                if (isset($ibram['bens']) && $collection_id == $ibram['bens']) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
-    }
-    
-    public function set_collection_delete_object($data) {
-        $ibram = get_option($this->plugin_name);
-        $collection_id = $data['socialdb_event_collection_id'];
-        $item_id = $data['socialdb_event_object_item_id'];
-        if(strpos(get_post($collection_id)->post_title, 'Conjuntos')!==false){
-            $category_root = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
-            $properties = get_term_meta($category_root, 'socialdb_category_property_id');
-            if($properties){
-                foreach ($properties as $property) {
-                    if(strpos(get_term_by('id',$property,'socialdb_property_type')->name, 'Bens')!==false){
-                        $values = get_post_meta($item_id, 'socialdb_property_'.$property);
-                        if($values && is_array($values) && count(array_filter($values)) > 0 ){
-                            $data['msg'] = __('There are items selected in this set','tainacan');
-                            $data['type'] = 'info';
-                            $data['title'] = __('Atention','tainacan');
-                            return $data;
+
+        public function verify_property_visibility($property, $collection_id) {
+            $ibram = get_option($this->plugin_name);
+            if (is_array($ibram)) {
+                if ($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento') {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public function verify_cancel_property_visibility($property, $object_id) {
+            $ibram = get_option($this->plugin_name);
+            $collection_id = $property['metas']['socialdb_property_collection_id'];
+            if (is_array($ibram)) {
+                if ($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento' && get_post($object_id)->post_status == 'publish') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public function set_collection_delete_object($data) {
+            $ibram = get_option($this->plugin_name);
+            $collection_id = $data['socialdb_event_collection_id'];
+            $item_id = $data['socialdb_event_object_item_id'];
+            if (strpos(get_post($collection_id)->post_title, 'Conjuntos') !== false) {
+                $category_root = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
+                $properties = get_term_meta($category_root, 'socialdb_category_property_id');
+                if ($properties) {
+                    foreach ($properties as $property) {
+                        if (strpos(get_term_by('id', $property, 'socialdb_property_type')->name, 'Bens') !== false) {
+                            $values = get_post_meta($item_id, 'socialdb_property_' . $property);
+                            if ($values && is_array($values) && count(array_filter($values)) > 0) {
+                                //$data['msg'] = __('There are items selected in this set', 'tainacan');
+                                $data['msg'] = 'Há entidades relacionadas a este registro';
+                                $data['type'] = 'info';
+                                $data['title'] = __('Attention', 'tainacan');
+                                return $data;
+                            }
+                            // break;
                         }
-                       // break;
                     }
                 }
             }
+            return false;
         }
-        return false;
-    }
 
-    public function cmp($needle, $data)
-    {
-        foreach($data as $index => $value)
-        {
-            if(preg_match("/".$needle."/", $index))
-            {
-                return $index;
+        public function cmp($needle, $data) {
+            foreach ($data as $index => $value) {
+                if (preg_match("/" . $needle . "/", $index)) {
+                    return $index;
+                }
             }
-        }
-        return false;
-    }
-
-    public function get_category_id($collection_id, $metaname, $is_root = true)
-    {
-        if($is_root)
-        {
-
-            $category_root_id = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
-            $ids = get_term_meta($category_root_id, "socialdb_category_property_id");
-        }else
-        {
-            $ids = get_term_meta($collection_id, "socialdb_category_property_id");
+            return false;
         }
 
-        foreach ($ids as $id)
-        {
-            $name = get_term_by("id", $id, "socialdb_property_type")->name;
+        public function get_category_id($collection_id, $metaname, $is_root = true) {
+            if ($is_root) {
 
-            if(strcmp($name,$metaname) == 0)
-            {
-
-                $term_id = get_term_meta($id, "socialdb_property_term_root", true);
-                break;
+                $category_root_id = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
+                $ids = get_term_meta($category_root_id, "socialdb_category_property_id");
+            } else {
+                $ids = get_term_meta($collection_id, "socialdb_category_property_id");
             }
+
+            foreach ($ids as $id) {
+                $name = get_term_by("id", $id, "socialdb_property_type")->name;
+
+                if (strcmp($name, $metaname) == 0) {
+
+                    $term_id = get_term_meta($id, "socialdb_property_term_root", true);
+                    break;
+                }
+            }
+
+            return $term_id;
         }
 
-        return $term_id;
-    }
+        public function remove_accents($string) {
+            return preg_replace(array("/(á|à|ã|â|ä)/", "/(Á|À|Ã|Â|Ä)/", "/(é|è|ê|ë)/", "/(É|È|Ê|Ë)/", "/(í|ì|î|ï)/", "/(Í|Ì|Î|Ï)/", "/(ó|ò|õ|ô|ö)/", "/(Ó|Ò|Õ|Ô|Ö)/", "/(ú|ù|û|ü)/", "/(Ú|Ù|Û|Ü)/", "/(ñ)/", "/(Ñ)/"), explode(" ", "a A e E i I o O u U n N"), $string);
+        }
 
-    public function remove_accents($string){
-        return preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/"),explode(" ","a A e E i I o O u U n N"),$string);
     }
-}
+    

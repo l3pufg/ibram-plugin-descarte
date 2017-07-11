@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Package Name\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-07 11:12-0300\n"
-"PO-Revision-Date: 2017-07-07 11:13-0300\n"
+"POT-Creation-Date: 2017-07-11 14:28-0300\n"
+"PO-Revision-Date: 2017-07-11 14:28-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt\n"
@@ -45,42 +45,43 @@ msgstr "Todas as coleções"
 msgid "Save"
 msgstr "Salvar"
 
-#: public/class-ibram-tainacan-public.php:503
+#: public/class-ibram-tainacan-public.php:506
 msgid "Close"
 msgstr "Fechar"
 
-#: public/class-ibram-tainacan-public.php:519
+#: public/class-ibram-tainacan-public.php:522
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: public/class-ibram-tainacan-public.php:524
+#: public/class-ibram-tainacan-public.php:527
 msgid "Remover"
 msgstr ""
 
-#: public/class-ibram-tainacan-public.php:547
-#: public/class-ibram-tainacan-public.php:606
+#: public/class-ibram-tainacan-public.php:550
+#: public/class-ibram-tainacan-public.php:609
 msgid "Find"
 msgstr "Procurar"
 
-#: public/class-ibram-tainacan-public.php:590
+#: public/class-ibram-tainacan-public.php:593
 msgid "Repository"
 msgstr "Repositório"
 
-#: public/class-ibram-tainacan-public.php:596
+#: public/class-ibram-tainacan-public.php:599
 msgid "Back"
 msgstr "Voltar"
 
-#: public/class-ibram-tainacan-public.php:603
+#: public/class-ibram-tainacan-public.php:606
 msgid "Search in all metadata"
 msgstr "Procurar em todos metadados"
 
-#: public/class-ibram-tainacan-public.php:664
-msgid "There are items selected in this set"
-msgstr "Há entidades relacionadas a este registro"
-
-#: public/class-ibram-tainacan-public.php:666
-msgid "Atention"
+#: public/class-ibram-tainacan-public.php:669
+#, fuzzy
+#| msgid "Atention"
+msgid "Attention"
 msgstr "Atenção"
+
+#~ msgid "There are items selected in this set"
+#~ msgstr "Há entidades relacionadas a este registro"
 
 #~ msgid ""
 #~ "Which will have their functionalities adapted to IBRAM's business rules."
