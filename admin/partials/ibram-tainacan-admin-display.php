@@ -18,10 +18,10 @@ $helper = new IBRAM_Tainacan_Helper();
  <div class="wrap">
 
     <h2> <?php echo esc_html(get_admin_page_title()); ?> - Tainacan </h2> <hr>
-
+    
     <form action="options.php" method="post" name="ibram_config">
 		<p>
-			<?php esc_attr_e("Select below the collections \"Bem Permanente\", \"Bem Bibliográfico\" and \"Bem Arquivístico\"", $this->plugin_name); ?>
+			<?php esc_attr_e("Select below the collections \"Bem Permanente\", \"Bem Bibliográfico\" and \"Bem Arquiv&iacute;stico\"", $this->plugin_name); ?>
 			<br/>
 		</p>
         <?php

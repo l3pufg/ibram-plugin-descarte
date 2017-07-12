@@ -630,7 +630,7 @@ class Ibram_Tainacan_Public {
     public function verify_property_visibility($property,$collection_id) {
         $ibram = get_option($this->plugin_name);
         if(is_array($ibram)) {
-            if($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento') {
+            if(( $collection_id == $ibram['descarte'] || $collection_id == $ibram['desaparecimento'] ) && $property['name'] == 'Cancelamento') {
                 return false;
             }
         }
@@ -642,7 +642,7 @@ class Ibram_Tainacan_Public {
         $ibram = get_option($this->plugin_name);
         $collection_id = $property['metas']['socialdb_property_collection_id'];
         if(is_array($ibram)) {
-            if($collection_id == $ibram['descarte'] && $property['name'] == 'Cancelamento' && get_post($object_id)->post_status == 'publish') {
+            if(( $collection_id == $ibram['descarte'] || $collection_id == $ibram['desaparecimento'] ) && $property['name'] == 'Cancelamento' && get_post($object_id)->post_status == 'publish') {
                 return true;
             }
         }
