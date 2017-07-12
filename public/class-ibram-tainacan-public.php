@@ -495,8 +495,7 @@ class Ibram_Tainacan_Public {
         return $_show_edit_buttons;
     }
 
-    public function show_reason_modal() {
-        ?>
+    public function show_reason_modal() { ?>
         <div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="reasonModal" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -507,8 +506,7 @@ class Ibram_Tainacan_Public {
                         </button>
 
                         <h4 class="modal-title">Motivo</h4>
-                    </div><!--Fim cabeçalho-->
-
+                    </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <form>
@@ -518,13 +516,13 @@ class Ibram_Tainacan_Public {
                     </div>
 
                     <div class="modal-footer"><!--Rodapé-->
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">
-        <?php _e('Cancel', 'tainacan'); ?>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" style="float: left;">
+                             <?php _e('Cancel', 'tainacan'); ?>
                         </button>
 
                         <button type="button" class="btn btn-primary" id="btnRemoveReason" data-id-exclude=""
                                 onclick="exclude_item()" disabled>
-        <?php _e('Confirm', 'tainacan'); ?>
+                             <?php _e('Confirm', 'tainacan'); ?>
                         </button>
 
                     </div><!--Fim rodapé-->
