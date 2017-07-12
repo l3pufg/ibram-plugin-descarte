@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Package Name\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-11 14:28-0300\n"
-"PO-Revision-Date: 2017-07-11 14:28-0300\n"
+"POT-Creation-Date: 2017-07-12 14:34-0300\n"
+"PO-Revision-Date: 2017-07-12 15:20-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.2\n"
+"X-Generator: Poedit 1.8.12\n"
 "X-Poedit-KeywordsList: esc_attr_e;__;_e\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: public\n"
@@ -31,11 +31,11 @@ msgstr "E aqui, as coleções \"Descarte\" e \"Desaparecimento\""
 
 #: admin/partials/ibram-tainacan-admin-display.php:24
 msgid ""
-"Select below the collections \"Bem Permanente\", \"Bem Bibliográfico\" and "
-"\"Bem Arquivístico\""
+"Select below the collections \"Bem Permanente\", \"Bem Bibliogr&aacute;fico"
+"\" and \"Bem Arquiv&iacute;stico\""
 msgstr ""
-"Selecione abaixo as coleções \"Bem Permanente\", \"Bem Bibliográfico\" e "
-"\"Bem Arquivístico\""
+"Selecione abaixo as coleções \"Bem Permanente\", \"Bem Bibliogr&aacute;fico"
+"\" e \"Bem Arquiv&iacute;stico\""
 
 #: admin/partials/ibram-tainacan-admin-display.php:41
 msgid "All collections"
@@ -54,8 +54,8 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #: public/class-ibram-tainacan-public.php:527
-msgid "Remover"
-msgstr ""
+msgid "Confirm"
+msgstr "Confirmar"
 
 #: public/class-ibram-tainacan-public.php:550
 #: public/class-ibram-tainacan-public.php:609
@@ -74,11 +74,29 @@ msgstr "Voltar"
 msgid "Search in all metadata"
 msgstr "Procurar em todos metadados"
 
-#: public/class-ibram-tainacan-public.php:669
+#: public/class-ibram-tainacan-public.php:664
+msgid "Cancel item"
+msgstr "Cancelar item"
+
+#: public/class-ibram-tainacan-public.php:667
+msgid "Excluded item"
+msgstr "Excluir item"
+
+#: public/class-ibram-tainacan-public.php:685
 #, fuzzy
 #| msgid "Atention"
 msgid "Attention"
 msgstr "Atenção"
+
+#~ msgid "Remover"
+#~ msgstr "Remover"
+
+#~ msgid ""
+#~ "Select below the collections \"Bem Permanente\", \"Bem Bibliográfico\" "
+#~ "and \"Bem Arquivístico\""
+#~ msgstr ""
+#~ "Selecione abaixo as coleções \"Bem Permanente\", \"Bem Bibliográfico\" e "
+#~ "\"Bem Arquivístico\""
 
 #~ msgid "There are items selected in this set"
 #~ msgstr "Há entidades relacionadas a este registro"

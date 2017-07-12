@@ -524,7 +524,7 @@ class Ibram_Tainacan_Public {
 
                         <button type="button" class="btn btn-primary" id="btnRemoveReason" data-id-exclude=""
                                 onclick="exclude_item()" disabled>
-        <?php _e('Remover', 'tainacan'); ?>
+        <?php _e('Confirm', 'tainacan'); ?>
                         </button>
 
                     </div><!--Fim rodapé-->
@@ -650,6 +650,23 @@ class Ibram_Tainacan_Public {
                 }
             }
             return false;
+        }
+        
+        /**
+         * 
+         * @param type $collection_id
+         * @return type
+         */
+        public function alter_label_exclude($collection_id) {
+            $ibram = get_option($this->plugin_name);
+            if(is_array($ibram)) {
+                if(( $collection_id == $ibram['descarte'] || $collection_id == $ibram['desaparecimento'] )) {
+                    //return __('Cancel item','tainacan');
+                    return 'Cancelar item';
+                }
+            }
+            //return __('Excluded item','tainacan');
+            return 'Excluir item';
         }
 
         public function set_collection_delete_object($data) {

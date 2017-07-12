@@ -21,7 +21,7 @@ $helper = new IBRAM_Tainacan_Helper();
     
     <form action="options.php" method="post" name="ibram_config">
 		<p>
-			<?php esc_attr_e("Select below the collections \"Bem Permanente\", \"Bem Bibliográfico\" and \"Bem Arquiv&iacute;stico\"", $this->plugin_name); ?>
+			<?php esc_attr_e("Select below the collections \"Bem Permanente\", \"Bem Bibliogr&aacute;fico\" and \"Bem Arquiv&iacute;stico\"", $this->plugin_name); ?>
 			<br/>
 		</p>
         <?php
