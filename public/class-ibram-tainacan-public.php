@@ -444,10 +444,12 @@ class Ibram_Tainacan_Public {
                                 $positions = $this->getValueCompound($data['object_id'], $bem_obj->term_id);
                                 if ($positions) {
                                     foreach ($positions as $position) {
-                                        if (isset($position[$value])) {
-                                            $meta_row = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_id = " . $position[$value]['values'][0]);
-                                            if (is_array($meta_row)) {
-                                                $related_id[$name] = $meta_row[0]->meta_value;
+                                        if (isset($position[$value]) && is_array($position[$value]['values']) ) {
+                                            foreach ($position[$value]['values'] as $rel_ids) {
+                                                $meta_row = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_id = " . $rel_ids);
+                                                if (is_array($meta_row)) {
+                                                    $related_id[$name][] = $meta_row[0]->meta_value;
+                                                }
                                             }
                                         }
                                     }
