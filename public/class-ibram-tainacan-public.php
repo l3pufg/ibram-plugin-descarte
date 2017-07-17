@@ -516,7 +516,7 @@ class Ibram_Tainacan_Public {
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <form>
+                            <form id="cancelReason">
                                 <textarea class="form-control" rows="8" id="reasontext" name="reasontext" onkeyup="change_button()"></textarea>
                             </form>
                         </div>
