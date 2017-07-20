@@ -673,6 +673,78 @@ class Ibram_Tainacan_Public {
             //return __('Excluded item','tainacan');
             return 'Excluir item';
         }
+        
+        /**
+         * 
+         * @param type $data
+         * @return boolean
+         */
+        public function verify_has_relation_in_collection($compound_id,$property_id,$item_id){
+            $ibram = get_option($this->plugin_name);
+            if($property_id === '0' || $property_id === 0){
+                $property_id = $compound_id;
+            }
+            $collection = get_post((int)get_term_meta($property_id,'socialdb_property_collection_id',true));
+            if($collection && in_array($collection->post_title, ['Coleções','Conjuntos'])){
+                if($collection->post_title === 'Coleções'){
+                   $con = $this->get_post_by_title('Conjuntos'); 
+                   if (is_object($con) ) {
+                        // The 2nd Loop
+                        $property_id = $this->findPropertyBens($con->ID);
+                        if($property_id && $this->is_selected_property($property_id, $item_id))
+                           return true;
+                   }
+                }
+            }
+            return false;
+        }
+        
+        private function findPropertyBens($id) {
+            $category_root_id = get_post_meta($id, 'socialdb_collection_object_type', true);
+            $properties = get_term_meta($category_root_id, 'socialdb_category_property_id');
+            if($properties && is_array($properties)){
+                foreach ($properties as $property) {
+                    $term = get_term_by('id', $property,'socialdb_property_type');
+                    if(isset($term->name) && $term->name == 'Bens')
+                        return $term->term_id;
+                }
+            }
+            return false;
+        }
+        
+        /**
+        * 
+        * @param type $property_id
+        * @param type $item_id
+        */
+       private function is_selected_property($property_id,$item_id) {
+           global $wpdb;
+           $wp_posts = $wpdb->prefix . "posts";
+           $wp_postmeta = $wpdb->prefix . "postmeta";
+           if ($meta_key == '') {
+               $meta_key = 'socialdb_property_' . $property_id;
+           }
+           $query = "
+                           SELECT pm.* FROM $wp_posts p
+                           INNER JOIN $wp_postmeta pm ON p.ID = pm.post_id    
+                           WHERE p.post_status LIKE 'publish' and pm.meta_key like '$meta_key' and pm.meta_value LIKE '%{$item_id}%'
+                   ";
+           $result = $wpdb->get_results($query);
+           if ($result && is_array($result) && count(array_filter($result)) > 0) {
+               return true;
+           }else{
+               return false;
+           }
+       }
+       
+       private function get_post_by_title($post_name, $output = OBJECT, $type = 'socialdb_collection') {
+            global $wpdb;
+            $post = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type='$type'", trim($post_name)));
+            if ($post)
+                return get_post($post, $output);
+
+            return null;
+        }
 
         public function set_collection_delete_object($data) {
             $ibram = get_option($this->plugin_name);
