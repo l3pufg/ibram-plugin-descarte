@@ -424,13 +424,12 @@ class Ibram_Tainacan_Public {
         $related = "Bens envolvidos";
         $related_id = [];
         $bens_envolvidos = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$related%'");
-
+        $root_id = get_post_meta($data['collection_id'], 'socialdb_collection_object_type', true);
         if (is_array($bens_envolvidos)) {
             foreach ($bens_envolvidos as $bem_obj) {
                 if (is_object($bem_obj)) {
                     $_metas = get_term_meta($bem_obj->term_id);
-
-                    if (is_array($_metas)) {
+                    if (is_array($_metas) && isset($_metas['socialdb_property_created_category'][0]) && $_metas['socialdb_property_created_category'][0] == $root_id) {
                         if (key_exists("socialdb_property_compounds_properties_id", $_metas)) {
                             $sub_properties = $_metas['socialdb_property_compounds_properties_id'][0];
 
