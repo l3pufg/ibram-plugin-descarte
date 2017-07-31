@@ -500,6 +500,57 @@ class Ibram_Tainacan_Public {
 
         return $_show_edit_buttons;
     }
+    
+    /**
+     * 
+     * @param type $tax_query
+     * @param type $collection_id
+     * @param type $boolean
+     */
+    public function update_tax_query($tax_query) {
+        $index = 0;
+        $roots = ['Categorias de Bem Permanente','Bem Permanente','Categorias de Bem Bibliográfico','Bem Bibliográfico'];
+        $situacoes = ['2 - Não Localizado','1 - Localizado'];
+        $ids_roots = [];
+        $ids_situacoes = [];
+        while(isset($tax_query[$index])){
+            $ids = $tax_query[$index]['terms'];
+            if(is_array($ids)){
+                foreach ($ids as $value) {
+                    $term = get_term_by('id', $value, 'socialdb_category_type');
+                    if(in_array($term->name, $roots)){
+                        $ids_roots[] = $term->term_id;
+                    }else if(in_array($term->name, $situacoes)){
+                        $ids_situacoes[] = $term->term_id;
+                    }
+                }
+            }
+            if(count($ids_roots)>0 && count($ids_situacoes)>0){
+                unset($tax_query[$index]);
+                break;
+            }
+            $ids_roots = [];
+            $ids_situacoes = [];
+            $index++;
+        }
+        //arrumando o array de busca
+        if(count($ids_roots)>0 && count($ids_situacoes)>0){
+            $tax_query[0] = array(
+                'taxonomy' => 'socialdb_category_type',
+                'field' => 'term_id',
+                'terms' => $ids_roots,
+                'operator' => 'IN'
+            );
+            $tax_query[] = array(
+                'taxonomy' => 'socialdb_category_type',
+                'field' => 'term_id',
+                'terms' => $ids_situacoes,
+                'operator' => 'IN'
+            );
+        }
+        //var_dump($tax_query);die;
+        return $tax_query;
+    }
 
     public function show_reason_modal() { ?>
         <div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="reasonModal" aria-hidden="true" data-backdrop="static">

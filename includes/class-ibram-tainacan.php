@@ -179,6 +179,7 @@ class Ibram_Tainacan {
                 $this->loader->add_filter( 'tainacan_is_bens_collection', $plugin_public, 'is_bens_collection', 10, 1);
                 $this->loader->add_filter( 'limit_search_collections', $plugin_public, 'limit_search_collections', 10, 1);
                 $this->loader->add_filter( 'alter_image_index_container', $plugin_public, 'alter_image_index_container', 10, 1);
+                $this->loader->add_filter( 'update_tax_query_args', $plugin_public, 'update_tax_query', 10, 1);
 	}
 
 	/**
