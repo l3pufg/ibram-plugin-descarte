@@ -509,7 +509,7 @@ class Ibram_Tainacan_Public {
      */
     public function update_tax_query($tax_query) {
         $index = 0;
-        $roots = ['Categorias de Bem Permanente','Bem Permanente','Categorias de Bem Bibliográfico','Bem Bibliográfico'];
+        $roots = ['Categorias de Bem Permanente','Bem Permanente','Categorias de Bem Bibliográfico','Bem Bibliográfico','Categorias de Bem Temporário','Bem Temporário'];
         $situacoes = ['2 - Não Localizado','1 - Localizado'];
         $ids_roots = [];
         $ids_situacoes = [];
