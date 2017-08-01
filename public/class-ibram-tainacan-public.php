@@ -604,7 +604,8 @@ class Ibram_Tainacan_Public {
                         <div class="input-group search-collection search-home">
                             <input style="color:white;" type="text" class="form-control" name="search_collections" id="search_collections" onfocus="changeBoxWidth(this)" placeholder="<?php _e('Find', 'tainacan') ?>"/>
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="button"  onclick="showIbramSearch($('#search_collections').val());"><span class="glyphicon glyphicon-search"></span></button>
+                                <!--button class="btn btn-default" type="button"  onclick="showIbramSearch($('#search_collections').val());"><span class="glyphicon glyphicon-search"></span></button-->
+                                <button class="btn btn-default" type="button"  onclick="showAdvancedSearch($('#src').val(), $('#formSearchCollectionsIbram #search_collections').val());"><span class="glyphicon glyphicon-search"></span></button>
                             </span>
                         </div>
                     </form>
