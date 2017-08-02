@@ -107,38 +107,45 @@ class Ibram_Tainacan_Public {
      */
     public function delete_item_permanent($obj_id, $col_id) {
         $_ret = 0;
-        $ibram_opts = get_option($this->plugin_name);
-
+        $ibram_opts = get_option($this->plugin_name);                         
+                
         if (is_int($obj_id) && $obj_id > 0) {
             if ($ibram_opts && is_array($ibram_opts)) {
-
-                $_is_set_col = intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
+                $_is_set_col = intval($ibram_opts['temporario']) === intval($col_id) || intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);                
                 if ($_is_set_col) {
                     $this->exclude_register_meta($obj_id);
                     $_ret = wp_update_post(['ID' => $obj_id, 'post_status' => 'trash']);
-                } else if (intval($ibram_opts['descarte']) === intval($col_id)) {
+                } else if (intval($ibram_opts['descarte']) === intval($col_id) || intval($ibram_opts['desaparecimento']) === intval($col_id)) {
                     $related_items = get_post_meta($obj_id, 'socialdb_related_items', true);
                     if (is_array($related_items)) {
-                        $situacao_bens_term_id = 2312;
-                        global $wpdb;
-                        $situacao_bem = "Situação - Bem";
-                        $bens_envolvidos_arr = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$situacao_bem%'");
+//                        $situacao_bens_term_id = 2312;
+//                        global $wpdb;
+//                        $situacao_bem = "Situação - Bem";
+//                        $bens_envolvidos_arr = $wpdb->get_results("SELECT * FROM $wpdb->terms WHERE name LIKE '%$situacao_bem%'");
+//
+//                        if (is_array($bens_envolvidos_arr)) {
+//                            foreach ($bens_envolvidos_arr as $selectable) {
+//                                $_title_arr = explode(" ", $selectable->name);
+//                                if (count($_title_arr) == 3 && $_title_arr[0] === "Situação" && $_title_arr[2] === "Bem") {
+//                                    $situacao_bens_term_id = intval($selectable->term_id);
+//                                }
+//                            }
+//                        }
 
-                        if (is_array($bens_envolvidos_arr)) {
-                            foreach ($bens_envolvidos_arr as $selectable) {
-                                $_title_arr = explode(" ", $selectable->name);
-                                if (count($_title_arr) == 3 && $_title_arr[0] === "Situação" && $_title_arr[2] === "Bem") {
-                                    $situacao_bens_term_id = intval($selectable->term_id);
-                                }
+                        foreach ($related_items as $index => $itm) {
+                            foreach ($itm as $id) {
+                                $situacao_id = $this->get_property_id($ibram_opts[$index], 'Situação');
+                                $metas = get_post_meta($id, 'socialdb_previously_situation');
+                                $category_root_situacao = $this->updateStatusProperty($id, $situacao_id, $metas);
+                                $tipo_situacao_id = $this->get_property_id($category_root_situacao, 'Tipo de situação',false);
+                                $metas_type = get_post_meta($id, 'socialdb_previously_situation_type');
+                                $this->updateStatusProperty($id, $tipo_situacao_id, $metas_type);
                             }
-                        }
-
-                        foreach ($related_items as $itm) {
                             /*
                              * === Keep this comment for now ===
                              * wp_update_post(['ID' => $itm, 'post_status' => 'publish']);
                              *
-                             */
+                             *
                             $terms = wp_get_post_terms($itm, 'socialdb_category_type');
                             $_item_terms = [];
 
@@ -165,7 +172,7 @@ class Ibram_Tainacan_Public {
                             }
                             $pointer = $cat_children['ids'][$_localizado_index];
 
-                            wp_set_object_terms($itm, get_term_by('id', $pointer, 'socialdb_category_type')->term_id, 'socialdb_category_type', true);
+                            wp_set_object_terms($itm, get_term_by('id', $pointer, 'socialdb_category_type')->term_id, 'socialdb_category_type', true);*/
                         }
                     }
                 }
@@ -173,6 +180,43 @@ class Ibram_Tainacan_Public {
         }
 
         return $_ret;
+    }
+    
+    /**
+     * 
+     * @global type $wpdb
+     * @param int $id
+     * @param int $situacao_property_id 
+     * @param array $new_values_array
+     */
+    public function updateStatusProperty($id, $situacao_property_id,$new_values_array,$only_update = false) {
+        global $wpdb;
+        $position = $this->getValueCompound($id, $situacao_property_id);
+        if (isset($position[0]) && isset($position[0][0]['values']) ) {
+            foreach ($position[0][0]['values'] as $rel_ids) {
+                $meta_row = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_id = " . $rel_ids);
+                if (is_array($meta_row)) {
+                    if($only_update){
+                        $query = "UPDATE $wpdb->postmeta SET meta_value = '$only_update' WHERE meta_id = ".$meta_row[0]->meta_id;
+                        $result = $wpdb->get_results($query);
+                        return true;
+                    }
+                    // itero sobre os valores anigos em ordem decrescente para
+                    // retornar o valor anterior desde que seja diferente do atual
+                    for($i = (count($new_values_array)-1);$i>=0;$i--){
+                        if($new_values_array[$i] != $meta_row[0]->meta_value && $new_values_array[$i] != ''){
+                            //var_dump($id, $meta_row[0], 'socialdb_category_type');
+                            wp_remove_object_terms($id, [absint($meta_row[0]->meta_value)], 'socialdb_category_type');
+                            $query = "UPDATE $wpdb->postmeta SET meta_value = '$new_values_array[$i]' WHERE meta_id = ".$meta_row[0]->meta_id;
+                            $result = $wpdb->get_results($query);
+                            wp_set_object_terms($id, [absint($new_values_array[$i])], 'socialdb_category_type', true);
+                            return $new_values_array[$i];
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     /**
@@ -219,6 +263,7 @@ class Ibram_Tainacan_Public {
                         if(is_array($itm)) {
                             foreach ($itm as $ibram_related_id) {
                                 $situacao_bens_term_id = $this->get_category_id($ibram_opts[$main_index], "Situação");
+                                $situacao_property_id = $this->get_property_id($ibram_opts[$main_index], 'Situação');
 
                                 // Save last option
                                 $situacao_bens_saved = $this->last_option_saved($ibram_related_id, $situacao_bens_term_id);
@@ -263,6 +308,7 @@ class Ibram_Tainacan_Public {
                                 }
 
                                 $option_id = get_term_by('id', $pointer, 'socialdb_category_type')->term_id;
+                                $this->updateStatusProperty($ibram_related_id, $situacao_property_id,[],$option_id);
                                 wp_set_object_terms($ibram_related_id, [$option_id], 'socialdb_category_type', true);
 
                                 $modo_option_id = $this->get_category_id($colecao_id, "Modo");
@@ -278,10 +324,12 @@ class Ibram_Tainacan_Public {
                                         break;
                                     }
                                 }
-
+                                
+                                $sub_option_id_before = $this->get_category_id($situacao_bens_saved, "Tipo de situação", false);
+                                $sub_situacao_property_id = $this->get_property_id($option_id, "Tipo de situação", false);
                                 $sub_option_id = $this->get_category_id($option_id, "Tipo de situação", false);
                                 // Save last option
-                                $tipo_situacao_bens_saved = $this->last_option_saved($ibram_related_id, $sub_option_id);
+                                $tipo_situacao_bens_saved = $this->last_option_saved($ibram_related_id, $sub_option_id_before);
                                 add_post_meta($ibram_related_id, "socialdb_previously_situation_type", $tipo_situacao_bens_saved);
 
                                 $sub_option_children = $this->get_tainacan_category_children($sub_option_id);
@@ -316,7 +364,11 @@ class Ibram_Tainacan_Public {
                                         $option_id = $sub_option_children_refactored['Roubado']; // metadado para categoria 'Não Localizado'
                                         break;
                                 }
-
+                                
+                                global $wpdb;
+                                add_post_meta($ibram_related_id, 'socialdb_property_'.$sub_situacao_property_id.'_cat', $option_id);
+                                $value = [ 0 => [ 0 => ['type'=>'term','values'=>[$wpdb->insert_id]] ]];
+                                update_post_meta($ibram_related_id, 'socialdb_property_helper_'.$sub_situacao_property_id , serialize($value));
                                 wp_set_object_terms($ibram_related_id, array(intval($option_id)), 'socialdb_category_type', true);
                             }
                         }
@@ -847,6 +899,27 @@ class Ibram_Tainacan_Public {
                 if (strcmp($name, $metaname) == 0) {
 
                     $term_id = get_term_meta($id, "socialdb_property_term_root", true);
+                    break;
+                }
+            }
+
+            return $term_id;
+        }
+        
+        public function get_property_id($collection_id, $metaname, $is_root = true) {
+            if ($is_root) {
+
+                $category_root_id = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
+                $ids = get_term_meta($category_root_id, "socialdb_category_property_id");
+            } else {
+                $ids = get_term_meta($collection_id, "socialdb_category_property_id");
+            }
+            foreach ($ids as $id) {
+                $name = get_term_by("id", $id, "socialdb_property_type")->name;
+
+                if (strcmp($name, $metaname) == 0) {
+
+                    $term_id = get_term_by("id", $id, "socialdb_property_type")->term_id;
                     break;
                 }
             }
