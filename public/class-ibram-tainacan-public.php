@@ -555,9 +555,7 @@ class Ibram_Tainacan_Public {
     
     /**
      * 
-     * @param type $tax_query
-     * @param type $collection_id
-     * @param type $boolean
+     * @param array $tax_query
      */
     public function update_tax_query($tax_query) {
         $index = 0;
