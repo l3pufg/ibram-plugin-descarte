@@ -790,7 +790,16 @@ class Ibram_Tainacan_Public {
                 if($collection->post_title === 'Coleções'){
                    $con = $this->get_post_by_title('Conjuntos'); 
                    if (is_object($con) ) {
-                        // The 2nd Loop
+                       // busco verifico se o BEM esta vinculado na colecao conjuntos  
+                        $property_id = $this->findPropertyBens($con->ID);
+                        if($property_id && $this->is_selected_property($property_id, $item_id))
+                           return true;
+                        } 
+               }
+               if($collection->post_title === 'Conjuntos'){
+                   $con = $this->get_post_by_title('Coleções'); 
+                   if (is_object($con) ) {
+                        // busco verifico se o bem esta vinculado na colecao 'colecao'
                         $property_id = $this->findPropertyBens($con->ID);
                         if($property_id && $this->is_selected_property($property_id, $item_id))
                            return true;
@@ -800,13 +809,13 @@ class Ibram_Tainacan_Public {
             return false;
         }
         
-        private function findPropertyBens($id) {
+        private function findPropertyBens($id,$name = 'Bens') {
             $category_root_id = get_post_meta($id, 'socialdb_collection_object_type', true);
             $properties = get_term_meta($category_root_id, 'socialdb_category_property_id');
             if($properties && is_array($properties)){
                 foreach ($properties as $property) {
                     $term = get_term_by('id', $property,'socialdb_property_type');
-                    if(isset($term->name) && $term->name == 'Bens')
+                    if(isset($term->name) && $term->name == $name)
                         return $term->term_id;
                 }
             }
