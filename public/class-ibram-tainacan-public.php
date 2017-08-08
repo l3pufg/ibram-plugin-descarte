@@ -178,8 +178,10 @@ class Ibram_Tainacan_Public {
                 }
             }
         }
-
-        return $_ret;
+        $data['msg'] = __('The event was successful confirmed','tainacan');
+        $data['type'] = 'success';
+        $data['title'] = __('Success','tainacan');
+        return $data;
     }
     
     /**
