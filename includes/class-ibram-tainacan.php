@@ -164,6 +164,8 @@ class Ibram_Tainacan {
                 $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
                 
                 $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
+                //API
+                $this->loader->add_filter( 'alter_repository_api_response', $plugin_public, 'alter_repository_api_response',10, 1 );
                 // Filters
                 $this->loader->add_filter( 'avoid-items-list-items-property-object', $plugin_public, 'verify_has_relation_in_collection',10, 3 );
                 $this->loader->add_filter( 'alter_label_exclude', $plugin_public, 'alter_label_exclude',10, 1 );
