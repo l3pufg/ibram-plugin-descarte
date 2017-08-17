@@ -554,7 +554,108 @@ class Ibram_Tainacan_Public {
 
         return $_show_edit_buttons;
     }
-    
+
+    public function verifyUniqueField($item_id){
+        $item = get_post($item_id);
+        $collection = get_post($item->post_parent);
+
+        //se for na colecao entidades
+        if($collection->post_title === 'Entidades'){
+            //categorias
+            $terms = wp_get_post_terms($item->ID, 'socialdb_category_type');
+            foreach ($terms as $tm) {
+                if($tm->name === 'Pessoa'){
+                    $properties = get_term_meta($tm->term_id,'socialdb_category_property_id');
+                    if($this->verifyValue($properties,$item_id,'CPF')){
+                        return ['title'=>__('Attention','tainacan'),'msg'=>'O cpf deste item foi utilizado!','type'=>'error'];
+                    }
+                }else if(strpos($tm->name,'Entidade Coletiva')){
+                    $properties = get_term_meta($tm->term_id,'socialdb_category_property_id');
+                    if($this->verifyValue($properties,$item_id,'CNPJ')){
+                        return ['title'=>__('Attention','tainacan'),'msg'=>'O cpf deste item foi utilizado!','type'=>'error'];
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+    * @param $properties
+    * @param $item_id
+    * @param $unique_field
+    * @return bool
+    */
+    public function verifyValue($properties,$item_id,$unique_field){
+        if($properties){
+            foreach ($properties as $property_id) {
+                $term = get_term_by('id',$property_id,'socialdb_property_type');
+                if($term->name === $unique_field){
+                    $value_property = get_post_meta($item_id,'socialdb_property_'.$term->term_id,true);
+                    $json =$this->get_data_by_property_json(
+                        [
+                        'property_id'=>$term->term_id,
+                        'term'=>$value_property
+                        ]);
+                    $json_decode = json_decode($json);
+                    if($json_decode && is_array($json_decode) && count($json_decode) > 0){
+                        foreach ($json_decode as $value) {
+                            if($value->value === $value_property && $value->item_id != $item_id ){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+     /**
+     * function get_objects_by_property_json()
+     * @param int Os dados vindo do formulario
+     * @return json com o id e o nome de cada objeto
+     * @author Eduardo Humberto
+     */
+    public function get_data_by_property_json($data, $meta_key = '',$is_search = false) {
+        global $wpdb;
+        $json =[];
+        $wp_posts = $wpdb->prefix . "posts";
+        $wp_postmeta = $wpdb->prefix . "postmeta";
+        $has_mask = get_term_meta($data['property_id'], 'socialdb_property_data_mask', true);
+        $term_relationships = $wpdb->prefix . "term_relationships";
+        if ($meta_key == '') {
+            $meta_key = 'socialdb_property_' . $data['property_id'];
+        }
+        //verifico a mascara para o metadao eh apenas na colecao
+        if(($has_mask && $has_mask == 'key') || $is_search){
+            $createdCategory = get_term_meta($data['property_id'], 'socialdb_property_created_category', true);
+            $category_root_id = get_term_by('id',$createdCategory, 'socialdb_category_type');
+            $query = "
+                        SELECT pm.* FROM $wp_posts p
+                        INNER JOIN $wp_postmeta pm ON p.ID = pm.post_id    
+                        INNER JOIN $term_relationships t ON p.ID = t.object_id    
+                        WHERE t.term_taxonomy_id = {$category_root_id->term_taxonomy_id}
+                        AND p.post_status LIKE 'publish' and pm.meta_key like '$meta_key' and pm.meta_value LIKE '%{$data['term']}%'
+                ";
+        }else if($has_mask){
+            $query = "
+                        SELECT pm.* FROM $wp_posts p
+                        INNER JOIN $wp_postmeta pm ON p.ID = pm.post_id    
+                        WHERE p.post_status LIKE 'publish' and pm.meta_key like '$meta_key' and pm.meta_value LIKE '%{$data['term']}%'
+                ";
+        }else{
+            return json_encode([]);
+        }
+        $result = $wpdb->get_results($query);
+        if ($result) {
+            foreach ($result as $object) {
+                $json[] = array('value' => $object->meta_value, 'label' => $object->meta_value,'item_id'=>$object->post_id);
+            }
+        }
+        return json_encode($json);
+    }
+
     /**
      * 
      * @param array $tax_query

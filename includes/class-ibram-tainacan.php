@@ -164,6 +164,8 @@ class Ibram_Tainacan {
                 $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
                 
                 $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
+                // Restaurando um item
+                $this->loader->add_filter( 'before_restore_item', $plugin_public, 'verifyUniqueField',10, 1 );
                 //API
                 $this->loader->add_filter( 'alter_repository_api_response', $plugin_public, 'alter_repository_api_response',10, 1 );
                 // Filters
