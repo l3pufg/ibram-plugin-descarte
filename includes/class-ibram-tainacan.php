@@ -163,6 +163,8 @@ class Ibram_Tainacan {
                 $this->loader->add_action( 'alter_selectbox_property', $plugin_public, 'ibram_alter_selectbox_property', 10, 2 );
                 $this->loader->add_action('wp_ajax_nopriv_get_cities', $plugin_public,'ibram_get_cities');
                 $this->loader->add_action('wp_ajax_get_cities', $plugin_public,'ibram_get_cities');
+                //acao para o helper de texto
+                $this->loader->add_action('alter_text_helper', $plugin_public,'ibram_alter_text_helper');
 
                 //FILTERS
                 //alter home page

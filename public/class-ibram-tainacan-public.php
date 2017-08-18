@@ -713,6 +713,13 @@ class Ibram_Tainacan_Public {
         return 'Palavra chave';
     }
 
+    /**
+    * Action para gerar o javascript para buscar as cidades
+    *
+    * @param $property
+    * @param $id_selectbox
+     *
+     */
     public function ibram_alter_selectbox_property($property,$id_selectbox){
         $value = (is_array($property['value_real'])) ? implode(',',$property['value_real']) : '' ;
         $term = get_term_by('id',$property['metas']['socialdb_property_created_category'],'socialdb_property_type');
@@ -789,6 +796,32 @@ class Ibram_Tainacan_Public {
         }
         echo json_encode($result);
         die();
+    }
+
+    /**
+    *
+     */
+    public function ibram_alter_text_helper(){
+        ?>
+        <script>
+          $(function(){
+             Hook.register('validate_unique_fields',function(args){
+                 var property_id = args[0];
+                 var value = args[1].trim().toUpperCase();
+                 var key = args[2];
+                 Hook.result =  false;
+                 $.each($('#meta-item-'+property_id+' input[name="socialdb_property_'+property_id+'[]"]'),function(index,id){
+                     console.log($(id).val().trim().toUpperCase(),value);
+                     console.log(id,key);
+                     if($(id).val().trim().toUpperCase()===value && $(id).attr('id')!=key){
+                         Hook.result = true;
+                     }
+
+                 });
+             });
+          });
+        </script>
+        <?php
     }
 
     public function show_reason_modal() { ?>
