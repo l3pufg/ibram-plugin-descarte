@@ -705,6 +705,92 @@ class Ibram_Tainacan_Public {
         return $tax_query;
     }
 
+    /**
+    * @param $property
+     * @return string
+     */
+    public function ibram_alter_label_item_search($property){
+        return 'Palavra chave';
+    }
+
+    public function ibram_alter_selectbox_property($property,$id_selectbox){
+        $value = (is_array($property['value_real'])) ? implode(',',$property['value_real']) : '' ;
+        $term = get_term_by('id',$property['metas']['socialdb_property_created_category'],'socialdb_property_type');
+        if(in_array($term->name,['Entidade Coletiva','Pessoa']) && $property['name'] == 'Cidade'){
+            $properties_siblings = get_term_meta($property['metas']['socialdb_property_created_category'],'socialdb_category_property_id');
+            if($properties_siblings && is_array($properties_siblings)){
+                foreach ($properties_siblings as $sibling){
+                    $term_sibling = get_term_by('id',$sibling,'socialdb_property_type');
+                    if($term_sibling->name === 'Estado' || $term_sibling->name === 'Estado/Província'){
+
+                        //busco o id do estado para buscar as cidades
+                        $id = str_replace($property['id'],$term_sibling->term_id,$id_selectbox);
+                        ?>
+                        <script>
+                            $(function(){
+                                var id_cities = '#<?php echo $id_selectbox ?>';
+                                var value_real = '<?php echo $value ?>'.split(',');
+                                $('#<?php echo $id ?>').change(function(){
+                                       jQuery.ajax({
+                                              url: '<?php echo admin_url('admin-ajax.php') ?>',
+                                              type: 'POST',
+                                              data: { term_id: $(this).val(),action: 'get_cities'},
+                                              dataType: 'JSON',
+                                              success: function(response) {
+                                                   if(response.length > 0){
+                                                       $(id_cities).html('<option value="">Selecione</option>');
+                                                       $.each(response,function(index,value){
+                                                            var is_checked = (value_real.indexOf(value.term_id.toString())>=0) ? 'checked' : ''
+                                                            $(id_cities).append('<option ' + is_checked + ' value="'+value.term_id+'">'+value.name+'</option>');
+                                                       });
+                                                   }
+                                              }
+                                          });
+
+                                });
+
+
+                                if($('#<?php echo $id ?>').val() != ''){
+                                    jQuery.ajax({
+                                          url: '<?php echo admin_url('admin-ajax.php') ?>',
+                                          type: 'POST',
+                                          data: { term_id: $('#<?php echo $id ?>').val(),action: 'get_cities'},
+                                          dataType: 'JSON',
+                                          success: function(response) {
+                                               if(response.length > 0){
+                                                   $(id_cities).html('<option value="">Selecione</option>');
+                                                   $.each(response,function(index,value){
+                                                        var is_checked = (value_real.indexOf(value.term_id.toString())>=0) ? 'selected="selected"' : '';
+                                                        $(id_cities).append('<option ' + is_checked + ' value="'+value.term_id+'">'+value.name+'</option>');
+                                                   });
+                                               }
+                                          }
+                                      });
+                                }
+                            });
+                        </script>
+                        <?php
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+    * @return mixed|string|void
+     */
+    public function ibram_get_cities() {
+        $result = [];
+        $children = get_term_children( $_POST['term_id'], 'socialdb_category_type' );
+        foreach ($children as $child){
+            $term = get_term_by( 'id', $child, 'socialdb_category_type' );
+            $result[] = $term;
+        }
+        echo json_encode($result);
+        die();
+    }
+
     public function show_reason_modal() { ?>
         <div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="reasonModal" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">

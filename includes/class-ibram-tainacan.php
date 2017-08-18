@@ -159,11 +159,18 @@ class Ibram_Tainacan {
                 $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
                 $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
                 $this->loader->add_action( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
-                
+                //acao para as cidades
+                $this->loader->add_action( 'alter_selectbox_property', $plugin_public, 'ibram_alter_selectbox_property', 10, 2 );
+                $this->loader->add_action('wp_ajax_nopriv_get_cities', $plugin_public,'ibram_get_cities');
+                $this->loader->add_action('wp_ajax_get_cities', $plugin_public,'ibram_get_cities');
+
+                //FILTERS
                 //alter home page
                 $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
                 
                 $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
+                // label metadado de relacionamento
+                $this->loader->add_filter( 'alter_label_item_search', $plugin_public, 'ibram_alter_label_item_search',10, 1 );
                 // Restaurando um item
                 $this->loader->add_filter( 'before_restore_item', $plugin_public, 'verifyUniqueField',10, 1 );
                 //API
