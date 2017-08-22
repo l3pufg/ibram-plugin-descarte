@@ -885,15 +885,12 @@ class Ibram_Tainacan_Public {
         <?php
     }
 
-    public function alter_home_page() {
-        ?>
+    public function alter_home_page() { ?>
         <div id="main_part" class="home">
             <div class="row container-fluid">
                 <div class="project-info">
-                    <center>
-                        <h1> <?php bloginfo('name') ?> </h1>
-                        <h3> <?php bloginfo('description') ?> </h3>
-                    </center>
+                     <h1> <?php bloginfo('name') ?> </h1>
+                     <h3> <?php bloginfo('description') ?> </h3>
                 </div>
                 <div id="searchBoxIndex" class="col-md-3 col-sm-12 center">
                     <form id="formSearchCollectionsIbram" role="search">
