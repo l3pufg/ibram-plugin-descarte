@@ -9,6 +9,8 @@
  */
 class Ibram_Tainacan_Public {
 
+
+    public $cancelamento_name = ['Cancelamento','Motivo do Cancelamento'];
     /**
      * The ID of this plugin.
      *
@@ -809,19 +811,41 @@ class Ibram_Tainacan_Public {
                  var property_id = args[0];
                  var value = args[1].trim().toUpperCase();
                  var key = args[2];
+                 var is_single = args[3];
                  Hook.result =  false;
-                 $.each($('#meta-item-'+property_id+' input[name="socialdb_property_'+property_id+'[]"]'),function(index,id){
-                     console.log($(id).val().trim().toUpperCase(),value);
-                     console.log(id,key);
-                     if($(id).val().trim().toUpperCase()===value && $(id).attr('id')!=key){
-                         Hook.result = true;
-                     }
+                 if(is_single === '0'){
+                     $.each($('#meta-item-'+property_id+' input[name="socialdb_property_'+property_id+'[]"]'),function(index,id){
+                         console.log($(id).val().trim().toUpperCase(),value);
+                         console.log(id,key);
+                         if($(id).val().trim().toUpperCase()===value && $(id).attr('id')!=key){
+                             Hook.result = true;
+                         }
 
-                 });
+                     });
+                 }
              });
           });
         </script>
         <?php
+    }
+
+    /**
+     * @return mixed|void
+     */public  function ibram_alter_advanced_search_filter($recover_data){
+         if(isset($recover_data['keyword']) && !empty(trim($recover_data['keyword']))){
+             $meta_query = array('relation' => 'OR');
+             $meta_query[] = array(
+                'key' => 'socialdb_object_commom_values',
+                'value' => $recover_data['keyword'],
+                'compare' => 'LIKE'
+             );
+         }else{
+           return false;
+         }
+    }
+
+    public function ibram_alter_s_wpquery_search($keyword){
+         return false;
     }
 
     public function show_reason_modal() { ?>
@@ -961,7 +985,7 @@ class Ibram_Tainacan_Public {
         public function verify_property_visibility($property,$collection_id) {
             $ibram = get_option($this->plugin_name);
             if(is_array($ibram)) {
-                if(( $collection_id == $ibram['descarte'] || $collection_id == $ibram['desaparecimento'] ) && $property['name'] == 'Cancelamento') {
+                if(( $collection_id == $ibram['descarte'] || $collection_id == $ibram['desaparecimento'] ) && in_array($property['name'],$this->cancelamento_name) ) {
                     return false;
                 }
             }
@@ -973,7 +997,7 @@ class Ibram_Tainacan_Public {
             $ibram = get_option($this->plugin_name);
             $collection_id = $property['metas']['socialdb_property_collection_id'];
             if(is_array($ibram)) {
-                if(( $collection_id == $ibram['descarte'] || $collection_id == $ibram['desaparecimento'] ) && $property['name'] == 'Cancelamento' && get_post($object_id)->post_status == 'publish') {
+                if(( $collection_id == $ibram['descarte'] || $collection_id == $ibram['desaparecimento'] ) && in_array($property['name'],$this->cancelamento_name) && get_post($object_id)->post_status == 'publish') {
                     return true;
                 }
             }

@@ -167,6 +167,9 @@ class Ibram_Tainacan {
                 $this->loader->add_action('alter_text_helper', $plugin_public,'ibram_alter_text_helper');
 
                 //FILTERS
+                //alterando a query da busca avancada
+                $this->loader->add_action('alter_advanced_search_filter', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
+                $this->loader->add_action('alter_s_wpquery_search', $plugin_public, 'ibram_alter_s_wpquery_search',10, 1);
                 //alter home page
                 $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
                 
