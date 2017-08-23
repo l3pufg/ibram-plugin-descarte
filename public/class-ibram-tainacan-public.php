@@ -805,31 +805,7 @@ class Ibram_Tainacan_Public {
     /**
     *
      */
-    public function ibram_alter_text_helper(){
-        ?>
-        <script>
-          $(function(){
-             Hook.register('validate_unique_fields',function(args){
-                 var property_id = args[0];
-                 var value = args[1].trim().toUpperCase();
-                 var key = args[2];
-                 var is_single = args[3];
-                 Hook.result =  false;
-                 if(is_single === '0'){
-                     $.each($('#meta-item-'+property_id+' input[name="socialdb_property_'+property_id+'[]"]'),function(index,id){
-                         console.log($(id).val().trim().toUpperCase(),value);
-                         console.log(id,key);
-                         if($(id).val().trim().toUpperCase()===value && $(id).attr('id')!=key){
-                             Hook.result = true;
-                         }
-
-                     });
-                 }
-             });
-          });
-        </script>
-        <?php
-    }
+    public function ibram_alter_text_helper(){}
 
     /**
      * @return mixed|void

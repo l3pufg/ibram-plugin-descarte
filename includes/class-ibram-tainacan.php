@@ -167,15 +167,15 @@ class Ibram_Tainacan {
         $this->loader->add_action('alter_text_helper', $plugin_public,'ibram_alter_text_helper');
 
         //FILTERS
-        //alterando a query da busca avancada
-        $this->loader->add_action('alter_advanced_search_filter', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
-        $this->loader->add_action('alter_s_wpquery_search', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
+        //alterando a query da busca avancada (Removido por acordo)
+        //$this->loader->add_action('alter_advanced_search_filter', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
+        //$this->loader->add_action('alter_s_wpquery_search', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
         //alter home page
         $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
 
         $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
-        // label metadado de relacionamento
-        $this->loader->add_filter( 'alter_label_item_search', $plugin_public, 'ibram_alter_label_item_search',10, 1 );
+        // label metadado de relacionamento //removido por acordo
+        //$this->loader->add_filter( 'alter_label_item_search', $plugin_public, 'ibram_alter_label_item_search',10, 1 );
         // Restaurando um item
         $this->loader->add_filter( 'before_restore_item', $plugin_public, 'verifyUniqueField',10, 1 );
         //API
