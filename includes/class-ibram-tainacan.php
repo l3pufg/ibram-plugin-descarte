@@ -156,46 +156,49 @@ class Ibram_Tainacan {
 	private function define_public_hooks() {
 
 		$plugin_public = new Ibram_Tainacan_Public( $this->get_plugin_name(), $this->get_version() );
-                $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-                $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-                $this->loader->add_action( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
-                //acao para as cidades
-                $this->loader->add_action( 'alter_selectbox_property', $plugin_public, 'ibram_alter_selectbox_property', 10, 2 );
-                $this->loader->add_action('wp_ajax_nopriv_get_cities', $plugin_public,'ibram_get_cities');
-                $this->loader->add_action('wp_ajax_get_cities', $plugin_public,'ibram_get_cities');
-                //acao para o helper de texto
-                $this->loader->add_action('alter_text_helper', $plugin_public,'ibram_alter_text_helper');
+        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
+        $this->loader->add_action( 'tainacan_delete_related_item', $plugin_public, 'trash_related_item', 10, 2 );
+        //acao para as cidades
+        $this->loader->add_action( 'alter_selectbox_property', $plugin_public, 'ibram_alter_selectbox_property', 10, 2 );
+        $this->loader->add_action('wp_ajax_nopriv_get_cities', $plugin_public,'ibram_get_cities');
+        $this->loader->add_action('wp_ajax_get_cities', $plugin_public,'ibram_get_cities');
+        //acao para o helper de texto
+        $this->loader->add_action('alter_text_helper', $plugin_public,'ibram_alter_text_helper');
 
-                //FILTERS
-                //alterando a query da busca avancada
-                $this->loader->add_action('alter_advanced_search_filter', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
-                $this->loader->add_action('alter_s_wpquery_search', $plugin_public, 'ibram_alter_s_wpquery_search',10, 1);
-                //alter home page
-                $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
-                
-                $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
-                // label metadado de relacionamento
-                $this->loader->add_filter( 'alter_label_item_search', $plugin_public, 'ibram_alter_label_item_search',10, 1 );
-                // Restaurando um item
-                $this->loader->add_filter( 'before_restore_item', $plugin_public, 'verifyUniqueField',10, 1 );
-                //API
-                $this->loader->add_filter( 'alter_repository_api_response', $plugin_public, 'alter_repository_api_response',10, 1 );
-                // Filters
-                $this->loader->add_filter( 'avoid-items-list-items-property-object', $plugin_public, 'verify_has_relation_in_collection',10, 3 );
-                $this->loader->add_filter( 'alter_label_exclude', $plugin_public, 'alter_label_exclude',10, 1 );
-                $this->loader->add_filter( 'tainacan_alter_delete_object', $plugin_public, 'set_collection_delete_object',10, 1 );
-                $this->loader->add_filter( 'skip_compound_property', $plugin_public, 'verify_cancel_property_visibility',10, 2 );
-                $this->loader->add_filter( 'property_is_visible', $plugin_public, 'verify_property_visibility',10, 2 );
-                $this->loader->add_filter( 'body_class', $plugin_public, 'add_ibram_body_slug' );
-                $this->loader->add_filter( 'tainacan_alter_permission_actions', $plugin_public, 'verify_delete_object', 10, 3 );
-                $this->loader->add_filter( 'tainacan_delete_item_perm', $plugin_public, 'delete_item_permanent', 10, 2 );
-                $this->loader->add_filter( 'tainacan_show_restore_options', $plugin_public, 'set_restore_options');
-                $this->loader->add_filter( 'tainacan_restore_descarted_item', $plugin_public, 'restore_descarted_item', 10, 1);
-                $this->loader->add_filter( 'tainacan_show_reason_modal', $plugin_public, 'show_reason_modal', 10, 1);
-                $this->loader->add_filter( 'tainacan_is_bens_collection', $plugin_public, 'is_bens_collection', 10, 1);
-                $this->loader->add_filter( 'limit_search_collections', $plugin_public, 'limit_search_collections', 10, 1);
-                $this->loader->add_filter( 'alter_image_index_container', $plugin_public, 'alter_image_index_container', 10, 1);
-                $this->loader->add_filter( 'update_tax_query_args', $plugin_public, 'update_tax_query', 10, 1);
+        //FILTERS
+        //alterando a query da busca avancada
+        $this->loader->add_action('alter_advanced_search_filter', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
+        $this->loader->add_action('alter_s_wpquery_search', $plugin_public, 'ibram_alter_advanced_search_filter',10, 1);
+        //alter home page
+        $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
+
+        $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
+        // label metadado de relacionamento
+        $this->loader->add_filter( 'alter_label_item_search', $plugin_public, 'ibram_alter_label_item_search',10, 1 );
+        // Restaurando um item
+        $this->loader->add_filter( 'before_restore_item', $plugin_public, 'verifyUniqueField',10, 1 );
+        //API
+        $this->loader->add_filter( 'alter_repository_api_response', $plugin_public, 'alter_repository_api_response',10, 1 );
+        // acao para bem permanente: bloquear listagem para colecoes ou conjuntos dependendo se o outro possuir
+        // valor no item passado como parametro
+        $this->loader->add_filter('alter_list_metadata_relations', $plugin_public,'ibram_alter_list_metadata_relations',10,2);
+        // Filters
+        $this->loader->add_filter( 'avoid-items-list-items-property-object', $plugin_public, 'verify_has_relation_in_collection',10, 3 );
+        $this->loader->add_filter( 'alter_label_exclude', $plugin_public, 'alter_label_exclude',10, 1 );
+        $this->loader->add_filter( 'tainacan_alter_delete_object', $plugin_public, 'set_collection_delete_object',10, 1 );
+        $this->loader->add_filter( 'skip_compound_property', $plugin_public, 'verify_cancel_property_visibility',10, 2 );
+        $this->loader->add_filter( 'property_is_visible', $plugin_public, 'verify_property_visibility',10, 2 );
+        $this->loader->add_filter( 'body_class', $plugin_public, 'add_ibram_body_slug' );
+        $this->loader->add_filter( 'tainacan_alter_permission_actions', $plugin_public, 'verify_delete_object', 10, 3 );
+        $this->loader->add_filter( 'tainacan_delete_item_perm', $plugin_public, 'delete_item_permanent', 10, 2 );
+        $this->loader->add_filter( 'tainacan_show_restore_options', $plugin_public, 'set_restore_options');
+        $this->loader->add_filter( 'tainacan_restore_descarted_item', $plugin_public, 'restore_descarted_item', 10, 1);
+        $this->loader->add_filter( 'tainacan_show_reason_modal', $plugin_public, 'show_reason_modal', 10, 1);
+        $this->loader->add_filter( 'tainacan_is_bens_collection', $plugin_public, 'is_bens_collection', 10, 1);
+        $this->loader->add_filter( 'limit_search_collections', $plugin_public, 'limit_search_collections', 10, 1);
+        $this->loader->add_filter( 'alter_image_index_container', $plugin_public, 'alter_image_index_container', 10, 1);
+        $this->loader->add_filter( 'update_tax_query_args', $plugin_public, 'update_tax_query', 10, 1);
 	}
 
 	/**

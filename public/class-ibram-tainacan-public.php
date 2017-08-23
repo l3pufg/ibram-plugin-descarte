@@ -11,6 +11,8 @@ class Ibram_Tainacan_Public {
 
 
     public $cancelamento_name = ['Cancelamento','Motivo do Cancelamento'];
+    public $bemPropertyNameConjuntos = 'Conjuntos';
+    public $bemPropertyNameColecoes = 'Coleções';
     /**
      * The ID of this plugin.
      *
@@ -1063,6 +1065,57 @@ class Ibram_Tainacan_Public {
                 }
             }
             return false;
+        }
+
+        public function ibram_alter_list_metadata_relations($property_id,$item_id){
+            $ibram = get_option($this->plugin_name);
+            $collection_id = get_term_meta($property_id,'socialdb_property_collection_id',true);
+            $category_id = get_term_meta($property_id,'socialdb_property_created_category',true);
+            $name = get_term_by('id',$property_id,'socialdb_property_type')->name;
+            if(is_array($ibram)) {
+                $is_referred_property = in_array($name,[$this->bemPropertyNameConjuntos,$this->bemPropertyNameColecoes]);
+                if( in_array($collection_id,$ibram) &&  $is_referred_property) {
+                    $properties = get_term_meta($category_id,'socialdb_category_property_id');
+                    if($properties){
+                        foreach ($properties as $property){
+                            $opposite = get_term_by('id',$property,'socialdb_property_type');
+                            if($opposite && $name!=$opposite->name && in_array($opposite->name,[$this->bemPropertyNameConjuntos,$this->bemPropertyNameColecoes])){
+                                if($this->getPropertySingleValuesHelper($item_id,$opposite->term_id)){
+                                    return '<div class="alert alert-info" role="alert">Este bem ja foi inserido no metadado '.$opposite->name.', para inserir em '.$name.' remova o relacionamento e realize uma nova pesquisa!</div>';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+        * @param $item_id
+        * @param $property_id
+         * @return array
+         */
+        public function getPropertySingleValuesHelper($item_id,$property_id){
+            global $wpdb;
+            $related_id = [];
+            $positions = $this->getValueCompound($item_id,$property_id);
+            if ($positions) {
+                foreach ($positions as $position) {
+                    if (isset($position[0]) && is_array($position[0]['values']) ) {
+                        foreach ($position[0]['values'] as $rel_ids) {
+                            $metas_row = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_id = " . $rel_ids);
+                            if (is_array($metas_row)) {
+                                foreach($metas_row as $meta_row){
+                                    if(isset($meta_row->meta_value) && !empty($meta_row->meta_value))
+                                        $related_id[] = $meta_row->meta_value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return $related_id;
         }
         
         /**
