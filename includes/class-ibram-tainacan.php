@@ -165,6 +165,8 @@ class Ibram_Tainacan {
         $this->loader->add_action('wp_ajax_get_cities', $plugin_public,'ibram_get_cities');
         //acao para o helper de texto
         $this->loader->add_action('alter_text_helper', $plugin_public,'ibram_alter_text_helper');
+        // desativar cabeçalho da colecao
+        $this->loader->add_action('disable_header_collection', $plugin_public,'ibram_disable_header_collection');
 
         //FILTERS
         //alterando a query da busca avancada (Removido por acordo)

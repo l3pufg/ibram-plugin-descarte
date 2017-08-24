@@ -826,6 +826,13 @@ class Ibram_Tainacan_Public {
          return false;
     }
 
+    /**
+    *
+    */
+    public function ibram_disable_header_collection(){
+
+    }
+
     public function show_reason_modal() { ?>
         <div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="reasonModal" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
