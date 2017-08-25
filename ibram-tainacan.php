@@ -23,11 +23,14 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+define( 'IBRAM_PATH', plugin_dir_path( __FILE__ ) );
+
 /**
  * The code that runs during plugin activation.
  */
 function activate_ibram_tainacan() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-ibram-tainacan-activator.php';
+	require_once plugin_dir_path(__FILE__) . 'public/class-import-data-set.php';
 	Ibram_Tainacan_Activator::activate();
 }
 
