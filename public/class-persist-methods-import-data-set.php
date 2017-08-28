@@ -24,7 +24,7 @@ class PersistMethodsImportDataSet{
 
     }
 
-    public function createProperty($property,$token,$is_repo = false){
+    public function createProperty($property,$token,$is_repo = false,$is_compound = false){
         $type = self::getTainacanTypeProperty($property);
         $array = wp_insert_term($property['name'], 'socialdb_property_type', array('parent' => $type->term_id,
             'slug' =>  self::generateSlug(trim($property['name']))));
@@ -62,7 +62,11 @@ class PersistMethodsImportDataSet{
             update_term_meta($array['term_id'], 'is_repository_property', ($is_repo) ? 'true' : 'false');
 
 
-
+            if($is_compound){
+                $meta = [];
+                $meta[$is_compound] = 'true';
+                update_term_meta($array['term_id'], 'socialdb_property_is_compounds', serialize($meta));
+            }
                 /*foreach ($metas as $meta) {
                     $ids_category = ['socialdb_property_object_category_id', 'socialdb_property_term_root'];
                     if (in_array($meta['key'], $ids_category) && trim($meta['value']) != '') {
@@ -116,9 +120,6 @@ class PersistMethodsImportDataSet{
 
     }
 
-    public function updateProperty(){
-
-    }
 
     public static function updateMetasTextProperty($term_id,$property){
         $return = $property['metadata'];
@@ -145,6 +146,10 @@ class PersistMethodsImportDataSet{
         update_term_meta($term_id, 'socialdb_property_help', ($return['is_aproximate_date']) ? '1': '0');
     }
 
+    /**
+     * @param $term_id
+     * @param $property
+     */
     public function updateMetasObjectProperty($term_id,$property){
         $return = $property['metadata'];
 
@@ -167,36 +172,98 @@ class PersistMethodsImportDataSet{
 
             if($has_reference){
                 global $wpdb;
+                delete_term_meta($term_id, 'socialdb_property_to_search_in');
                 add_term_meta($term_id, 'socialdb_property_to_search_in', $search);
-                MappingImportDataSet::addMap('references',$wpdb->insert_id,$search);
+                MappingImportDataSet::addMap('references-properties',$wpdb->insert_id,$search);
             }else{
-                update_term_meta($term_id, 'socialdb_property_to_search_in', (!$return['column_ordenation']) ? 'false' : $return['column_ordenation']);
+                update_term_meta($term_id, 'socialdb_property_to_search_in', $search);
             }
         }
 
-        update_term_meta($term_id, 'socialdb_property_to_search_in', (!$return['column_ordenation']) ? 'false' : $return['column_ordenation']);
+        //evitar items repetidos
+        update_term_meta($term_id, 'socialdb_property_avoid_items',  ($return['avoid_items']) ? 'true': 'false');
 
+        //adicionar novos itens
+        update_term_meta($term_id, 'socialdb_property_habilitate_new_item',  ($return['habilitate_new_item']) ? 'true': 'false');
 
-        $return['search_in_properties'] =  empty($property['metas']['socialdb_property_to_search_in']) ? false : $property['metas']['socialdb_property_to_search_in'] ;
-        $return['avoid_items'] = ( isset($property['metas']['socialdb_property_avoid_items'])) ? true : false;
-        $return['habilitate_new_item'] = ( isset($property['metas']['socialdb_property_habilitate_new_item']) && $property['metas']['socialdb_property_habilitate_new_item'] === 'true' ) ? true : false;
-        $return['object_category_id'] = empty($property['metas']['socialdb_property_object_category_id']) ? false : $property['metas']['socialdb_property_object_category_id'] ;
-        $return['to_search_in'] = empty($property['metas']['socialdb_property_to_search_in']) ? false : $property['metas']['socialdb_property_to_search_in'] ;
-        $return['is_filter'] = empty($property['metas']['socialdb_property_object_is_facet']) ? false : $property['metas']['socialdb_property_object_is_facet'] ;
-        $return['reverse'] = empty($property['metas']['socialdb_property_object_reverse']) ? false : $property['metas']['socialdb_property_object_is_facet'] ;
-        $return['cardinality'] = isset($property['metas']['socialdb_property_object_cardinality']) ? $property['metas']['socialdb_property_object_cardinality'] : '1';
+        //categorias que serao utilizadas para buscar os itens vinculados
+        if(!$return['object_category_id']){
+            update_term_meta($term_id, 'socialdb_property_object_category_id', '');
+        }else{
+            $ids_categories = explode(',',$return['object_category_id']);
+            $ids_new = [];
+            $has_reference = false;
+            foreach ($ids_categories as $id_category) {
+                if(MappingImportDataSet::hasMap('categories',$id_category)){
+                    $ids_new[] = MappingImportDataSet::hasMap('categories',$id_category);
+                }else{
+                    $has_reference = true;
+                    $ids_new[] = $id_category.'_reference';
+                }
+            }
+            $categories = implode(',',$ids_new);
+
+            if($has_reference){
+                global $wpdb;
+                delete_term_meta($term_id, 'socialdb_property_object_category_id');
+                add_term_meta($term_id, 'socialdb_property_object_category_id', $categories);
+                MappingImportDataSet::addMap('references-categories',$wpdb->insert_id,$categories);
+            }else{
+                update_term_meta($term_id, 'socialdb_property_object_category_id', $categories);
+            }
+        }
+
+        //se o metadado filtro
+        update_term_meta($term_id, 'socialdb_property_object_is_facet',  ($return['is_filter']) ? $return['is_filter']: '');
+
+        //se o metadado eh reverso
+        if($return['reverse']){
+            update_term_meta($term_id, 'socialdb_property_object_is_reverse', 'true');
+            if(MappingImportDataSet::hasMap('properties',$return['reverse'])){
+                $id = MappingImportDataSet::hasMap('properties',$return['reverse']);
+                update_term_meta($term_id, 'socialdb_property_object_reverse', $id);
+            }else{
+                global $wpdb;
+                $id = $return['reverse'].'_reference';
+                delete_term_meta($term_id, 'socialdb_property_object_reverse');
+                add_term_meta($term_id, 'socialdb_property_object_reverse', $id);
+                MappingImportDataSet::addMap('references-properties',$wpdb->insert_id,$id);
+            }
+        }else{
+            update_term_meta($term_id, 'socialdb_property_object_reverse', '');
+            update_term_meta($term_id, 'socialdb_property_object_is_reverse', 'false');
+        }
+
+        //se o metadado filtro
+        update_term_meta($term_id, 'socialdb_property_object_cardinality',  ($return['cardinality']) ? $return['cardinality']: '1');
     }
-
 
     /**
-     * funcao que insere o postmeta e retorna o id gerado mesmo argumentos
-     * e opcionais do postmeta
+     * @param $term_id
+     * @param $property
      */
-    public function insertPostMetaRow($post_id, $key, $value, $is_single = false) {
-        global $wpdb;
-        add_post_meta($post_id, $key, $value, $is_single);
-        return $wpdb->insert_id;
+    public function updateMetasTermProperty($term_id,$property){
+        $return = $property['metadata'];
+
+        update_term_meta($term_id, 'socialdb_property_term_cardinality',  ($return['cardinality']) ? $return['cardinality']: '1');
+
+        //se o metadado eh reverso
+        if($return['taxonomy']){
+            if(MappingImportDataSet::hasMap('categories',$return['taxonomy'])){
+                $id = MappingImportDataSet::hasMap('properties',$return['taxonomy']);
+                update_term_meta($term_id, 'socialdb_property_term_root', $id);
+            }else{
+                global $wpdb;
+                $id = $return['taxonomy'].'_reference';
+                delete_term_meta($term_id, 'socialdb_property_term_root');
+                add_term_meta($term_id, 'socialdb_property_term_root', $id);
+                MappingImportDataSet::addMap('references-categories',$wpdb->insert_id,$id);
+            }
+        }else{
+            update_term_meta($term_id, 'socialdb_property_term_root', '');
+        }
     }
+
     /**
      * function generate_slug($title)
      * @param string $string

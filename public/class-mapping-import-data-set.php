@@ -23,7 +23,7 @@ class MappingImportDataSet{
             $rawMap = file_get_contents(self::$file_name);
             self::$map =  json_decode($rawMap, true);
         }else{
-            self::$map = [ 'collections' => [], 'properties' => [], 'categories' => [],'tabs'=>[],'references'=>[]];
+            self::$map = [ 'collections' => [], 'properties' => [], 'categories' => [],'tabs'=>[],'references-properties'=>[],'references-categories'=>[]];
         }
     }
 
