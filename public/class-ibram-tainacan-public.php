@@ -76,6 +76,11 @@ class Ibram_Tainacan_Public {
         return $classes;
     }
 
+    public  function isBem($col_id){
+        $ibram_opts = get_option($this->plugin_name);
+        return  intval($ibram_opts['temporario']) === intval($col_id) || intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
+    }
+
     /**
      * If user is trying to delete a pre-selected colleciton as 'bem permanente',
      * it will be sent automatically for modaration.
@@ -1013,6 +1018,7 @@ class Ibram_Tainacan_Public {
             if($property_id === '0' || $property_id === 0){
                 $property_id = $compound_id;
             }
+            $property = get_term_by('id',$property_id,'socialdb_property_type');
             $collection = get_post((int)get_term_meta($property_id,'socialdb_property_collection_id',true));
             if($collection && in_array($collection->post_title, ['Coleções','Conjuntos'])){
                 if($collection->post_title === 'Coleções'){
@@ -1032,6 +1038,24 @@ class Ibram_Tainacan_Public {
                         if($property_id && $this->is_selected_property($property_id, $item_id))
                            return true;
                    }
+                }
+            }else if($property && $property->name === 'Autor'){
+                $collection = $this->get_post_by_title('Entidades');
+                $root_category = get_post_meta($collection->ID,'socialdb_collection_object_type',true);
+                $categories = get_term_meta($property->term_id,'socialdb_property_object_category_id');
+                // se for autor e possuir a categoria raiz de enteidades entao ja eh o metadado q procuramos
+                if(is_array($categories) && in_array($root_category,$categories)){
+                    $key = array_search($root_category, $categories);
+                    unset($categories[$key]);
+                    $object_categories = wp_get_object_terms($item_id,'socialdb_category_type');
+                    foreach ($object_categories as $object_category) {
+                        // temos uma funcao autor presente nas categorias do item 
+                        if(in_array($object_category->term_id,$categories)){
+                             return false;
+                        }
+                    }
+                    // nao existe nenhum item com a funcao autor
+                    return true;
                 }
             }
             return false;
