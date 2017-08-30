@@ -178,6 +178,11 @@ class Ibram_Tainacan {
         $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
         // label metadado de relacionamento //removido por acordo
         //$this->loader->add_filter( 'alter_label_item_search', $plugin_public, 'ibram_alter_label_item_search',10, 1 );
+
+
+        // Filters
+        //alterar as categorias q procuram os metadados em suas buscas
+        $this->loader->add_filter( 'alter_categories_to_find_properties', $plugin_public, 'ibram_alter_categories_to_find_properties',10, 1 );
         // Restaurando um item
         $this->loader->add_filter( 'before_restore_item', $plugin_public, 'verifyUniqueField',10, 1 );
         //API
@@ -185,7 +190,6 @@ class Ibram_Tainacan {
         // acao para bem permanente: bloquear listagem para colecoes ou conjuntos dependendo se o outro possuir
         // valor no item passado como parametro
         $this->loader->add_filter('alter_list_metadata_relations', $plugin_public,'ibram_alter_list_metadata_relations',10,2);
-        // Filters
         $this->loader->add_filter( 'avoid-items-list-items-property-object', $plugin_public, 'verify_has_relation_in_collection',10, 3 );
         $this->loader->add_filter( 'alter_label_exclude', $plugin_public, 'alter_label_exclude',10, 1 );
         $this->loader->add_filter( 'tainacan_alter_delete_object', $plugin_public, 'set_collection_delete_object',10, 1 );

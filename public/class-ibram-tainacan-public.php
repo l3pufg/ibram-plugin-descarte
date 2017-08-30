@@ -92,17 +92,17 @@ class Ibram_Tainacan_Public {
      * @return   boolean   $_ret      Whether may delete or not
      */
     public function verify_delete_object($act, $col_id, $evt_id) {
-        $ibram_opts = get_option($this->plugin_name);
+        //$ibram_opts = get_option($this->plugin_name);
 
         $ret = true;
-        if ("socialdb_collection_permission_delete_object" === $act) {
-            if ($ibram_opts && is_array($ibram_opts)) {
-                $_is_set_col = intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
-                if ($_is_set_col) {
-                    $ret = false;
-                }
-            }
-        }
+//        if ("socialdb_collection_permission_delete_object" === $act) {
+//            if ($ibram_opts && is_array($ibram_opts)) {
+//                $_is_set_col = intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);
+//                if ($_is_set_col) {
+//                    $ret = false;
+//                }
+//            }
+//        }
         return $ret;
     }
 
@@ -122,8 +122,8 @@ class Ibram_Tainacan_Public {
             if ($ibram_opts && is_array($ibram_opts)) {
                 $_is_set_col = intval($ibram_opts['temporario']) === intval($col_id) || intval($ibram_opts['bem_permanente']) === intval($col_id) || intval($ibram_opts['bibliografico']) === intval($col_id) || intval($ibram_opts['arquivistico']) === intval($col_id);                
                 if ($_is_set_col) {
-                    $this->exclude_register_meta($obj_id);
-                    $_ret = wp_update_post(['ID' => $obj_id, 'post_status' => 'trash']);
+//                    $this->exclude_register_meta($obj_id);
+//                    $_ret = wp_update_post(['ID' => $obj_id, 'post_status' => 'trash']);
                 } else if (intval($ibram_opts['descarte']) === intval($col_id) || intval($ibram_opts['desaparecimento']) === intval($col_id)) {
                     $related_items = get_post_meta($obj_id, 'socialdb_related_items', true);
                     if (is_array($related_items)) {
@@ -1014,9 +1014,10 @@ class Ibram_Tainacan_Public {
         }
         
         /**
-         * 
-         * @param type $data
-         * @return boolean
+        * @param $compound_id
+        * @param $property_id
+        * @param $item_id
+         * @return bool
          */
         public function verify_has_relation_in_collection($compound_id,$property_id,$item_id){
             $ibram = get_option($this->plugin_name);
@@ -1068,6 +1069,7 @@ class Ibram_Tainacan_Public {
                 $categories = wp_get_object_terms($item_id,'socialdb_category_type');
                 if(is_array($categories)){
                     foreach ($categories as $category) {
+                        //verifico se eh bem permanente
                         if($category->term_id == $root_category){
                             return false;
                         }
@@ -1082,7 +1084,7 @@ class Ibram_Tainacan_Public {
                         if(in_array($category->name,['2 - Não Localizado','3 - Registro Excluído (Baixa)'])){
                             return true;
                         }
-
+                         //verifico se eh bem permanente apos verificar se nao eh perdido ou excluido
                         if($category->term_id == $root_category){
                             return false;
                         }
@@ -1092,7 +1094,12 @@ class Ibram_Tainacan_Public {
             }
             return false;
         }
-        
+
+        /**
+        * @param $id
+        * @param string $name
+         * @return bool|int
+         */
         private function findPropertyBens($id,$name = 'Bens') {
             $category_root_id = get_post_meta($id, 'socialdb_collection_object_type', true);
             $properties = get_term_meta($category_root_id, 'socialdb_category_property_id');
@@ -1106,6 +1113,11 @@ class Ibram_Tainacan_Public {
             return false;
         }
 
+        /**
+        * @param $property_id
+        * @param $item_id
+        * @return bool|string
+        */
         public function ibram_alter_list_metadata_relations($property_id,$item_id){
             $ibram = get_option($this->plugin_name);
             $collection_id = get_term_meta($property_id,'socialdb_property_collection_id',true);
@@ -1158,9 +1170,9 @@ class Ibram_Tainacan_Public {
         }
         
         /**
-        * 
-        * @param type $property_id
-        * @param type $item_id
+        * @param $property_id
+        * @param $item_id
+        * @return bool
         */
        private function is_selected_property($property_id,$item_id) {
            global $wpdb;
@@ -1181,7 +1193,37 @@ class Ibram_Tainacan_Public {
                return false;
            }
        }
-       
+
+       public function ibram_alter_categories_to_find_properties($categories){
+           $names_categories = ['Função Entidade Pessoa','Funções Entidade Coletiva','Funções Familia'];
+           if(is_array($categories)){
+               $categories = array_filter(array_unique($categories));
+               foreach ($categories as $category){
+                   $cat = get_term_by('id',$category,'socialdb_category_type');
+                   if($cat && in_array($cat->name,$names_categories)){
+                       $collection = $this->get_post_by_title('Entidades');
+                       $root_category = get_post_meta($collection->ID,'socialdb_collection_object_type',true);
+                   }else if(isset($cat->parent) && $cat->parent != 0 ){
+                        $parent = get_term_by('id',$cat->parent,'socialdb_category_type');
+                        if($parent && in_array($parent->name,$names_categories)){
+                            $collection = $this->get_post_by_title('Entidades');
+                            $root_category = get_post_meta($collection->ID,'socialdb_collection_object_type',true);
+                       }
+                   }
+               }
+           }
+
+           if(isset($root_category) && !in_array($root_category,$categories))
+               $categories[] = $root_category;
+           return $categories;
+       }
+
+       /**
+        * @param $post_name
+        * @param string $output
+        * @param string $type
+        * @return array|null|WP_Post
+        */
        private function get_post_by_title($post_name, $output = OBJECT, $type = 'socialdb_collection') {
             global $wpdb;
             $post = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type='$type'", trim($post_name)));
