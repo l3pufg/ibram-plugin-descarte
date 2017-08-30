@@ -534,6 +534,11 @@ class Ibram_Tainacan_Public {
             return false;
     }
 
+    /**
+    * @param $item_id
+    * @param $property_id
+     * @return bool|mixed
+     */
     private function getValueCompound($item_id, $property_id) {
         $meta = get_post_meta($item_id, 'socialdb_property_helper_' . $property_id, true);
         if ($meta && $meta != '') {
@@ -1057,6 +1062,33 @@ class Ibram_Tainacan_Public {
                     // nao existe nenhum item com a funcao autor
                     return true;
                 }
+             // condicao para buscar apenas em bem permanente neste metadado de descarte
+            }else if($property && $property->name === 'Bens museológicos' && $collection->ID == $ibram['descarte']){
+                $root_category = get_post_meta($ibram['bem_permanente'],'socialdb_collection_object_type',true);
+                $categories = wp_get_object_terms($item_id,'socialdb_category_type');
+                if(is_array($categories)){
+                    foreach ($categories as $category) {
+                        if($category->term_id == $root_category){
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }else if($property && $property->name === 'Bens museológicos' && $collection->ID == $ibram['desaparecimento']){
+                $root_category = get_post_meta($ibram['bem_permanente'],'socialdb_collection_object_type',true);
+                $categories = wp_get_object_terms($item_id,'socialdb_category_type');
+                if(is_array($categories)){
+                    foreach ($categories as $category) {
+                        if(in_array($category->name,['2 - Não Localizado','3 - Registro Excluído (Baixa)'])){
+                            return true;
+                        }
+
+                        if($category->term_id == $root_category){
+                            return false;
+                        }
+                    }
+                    return true;
+                }
             }
             return false;
         }
@@ -1163,7 +1195,7 @@ class Ibram_Tainacan_Public {
             $ibram = get_option($this->plugin_name);
             $collection_id = $data['socialdb_event_collection_id'];
             $item_id = $data['socialdb_event_object_item_id'];
-            if (strpos(get_post($collection_id)->post_title, 'Conjuntos') !== false) {
+            if (strpos(get_post($collection_id)->post_title, 'Conjuntos') !== false || strpos(get_post($collection_id)->post_title, 'Coleções') !== false) {
                 $category_root = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
                 $properties = get_term_meta($category_root, 'socialdb_category_property_id');
                 if ($properties) {
