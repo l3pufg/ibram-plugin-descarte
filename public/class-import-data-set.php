@@ -20,16 +20,26 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php.php';
 
 
      public static function proccessRepositoryProperties($repository){
+         $cat_id = get_term_by('slug','socialdb_category','socialdb_category_type')->term_id;
          foreach ($repository['metadata'] as $metadata) {
               if(strpos($metadata['slug'],'socialdb_property_fixed')!==false){
                     PersistMethodsImportDataSet::updateFixedProperty($metadata);
               }else{
-                  if(MappingImportDataSet::hasMap('properties',$metadata['id'])){
-
+                  $has_id = MappingImportDataSet::hasMap('properties',$metadata['id']);
+                  if($has_id){
+                      PersistMethodsImportDataSet::updateProperty($has_id,$metadata,IBRAM_VERSION,true,false);
                   }else{
-
+                        $id = PersistMethodsImportDataSet::createProperty($metadata,IBRAM_VERSION,true);
+                        add_term_meta($cat_id,'socialdb_category_property_id',$id);
                   }
               }
+         }
+     }
+
+
+     public static function proccessCollections($collections){
+         foreach ($collections as $collection){
+
          }
      }
 

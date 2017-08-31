@@ -23,6 +23,9 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+
+define('IBRAM_VERSION','0.1');
+
 define( 'IBRAM_PATH', plugin_dir_path( __FILE__ ) );
 
 /**
