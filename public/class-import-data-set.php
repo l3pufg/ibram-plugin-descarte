@@ -22,9 +22,13 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php.php';
      public static function proccessRepositoryProperties($repository){
          foreach ($repository['metadata'] as $metadata) {
               if(strpos($metadata['slug'],'socialdb_property_fixed')!==false){
-
+                    PersistMethodsImportDataSet::updateFixedProperty($metadata);
               }else{
-                  if(MappingImportDataSet::hasMap('properties',$metadata['id']));
+                  if(MappingImportDataSet::hasMap('properties',$metadata['id'])){
+
+                  }else{
+
+                  }
               }
          }
      }
