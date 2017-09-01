@@ -8,20 +8,23 @@
 
 class MappingImportDataSet{
 
-    public static $file_name = IBRAM_PATH.'files/repository-mapping.json';
     public static $map;
 
     public static function isMapped(){
-        return is_file(self::$file_name);
+        $option = get_option('mapping-tainacan-import');
+        //return is_file(self::$file_name);
+        return $option && is_array($option);
     }
 
     /**
      *
      */
-    public static function setJson(){
-        if(self::isMapped()){
-            $rawMap = file_get_contents(self::$file_name);
-            self::$map =  json_decode($rawMap, true);
+    public static function initMap(){
+        $mapping = self::isMapped();
+        if($mapping){
+            //$rawMap = file_get_contents(self::$file_name);
+            //self::$map =  json_decode($rawMap, true);
+            self::$map =  $mapping;
         }else{
             self::$map = [ 'collections' => [], 'properties' => [], 'categories' => [],'tabs'=>[],'references-properties'=>[],'references-categories'=>[]];
         }
@@ -49,20 +52,9 @@ class MappingImportDataSet{
      *
      */
     public static function saveMap(){
-        if(self::isMapped())
-            unlink(self::$file_name);
-
-        self::generateJsonFile(self::$file_name);
-    }
-
-    /**
-     * @param $name_file
-     */
-    public static function generateJsonFile($name_file) {
-        ob_start();
-        ob_end_clean();
-        $df = fopen($name_file, 'w');
-        fputs($df, self::$map);
-        fclose($df);
+        //if(self::isMapped())
+            //(self::$file_name);
+        update_option('mapping-tainacan-import', self::$map);
+        //self::generateJsonFile(self::$file_name);
     }
 }

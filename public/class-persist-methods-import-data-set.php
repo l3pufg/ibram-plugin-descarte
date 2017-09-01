@@ -1,12 +1,31 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: desenvolvedor
  * Date: 25/08/2017
  * Time: 10:33
  */
 
 class PersistMethodsImportDataSet{
+
+    /**
+     * @param $repository
+     */
+    public static function  updateRepository($repository){
+        $settings = $repository['settings'];
+        update_option('blogname',$settings['title']);
+        update_option('blogdescription',$settings['description']);
+        update_option('socialdb_repository_permissions',['socialdb_collection_permission_create_collection'=>$settings['repository_permissions']['socialdb_collection_permission_create_collection'],
+            'socialdb_collection_permission_delete_collection'=>$settings['repository_permissions']['socialdb_collection_permission_delete_collection']]);
+
+        $array_mapping = [
+            'bem_permanente'=>MappingImportDataSet::hasMap('collections',$settings['ibram-config']['bem_permanente']),
+            'bibliografico'=>MappingImportDataSet::hasMap('collections',$settings['ibram-config']['bibliografico']),
+            'arquivistico'=>MappingImportDataSet::hasMap('collections',$settings['ibram-config']['arquivistico']),
+            'descarte'=>MappingImportDataSet::hasMap('collections',$settings['ibram-config']['descarte']),
+            'desaparecimento'=>MappingImportDataSet::hasMap('collections',$settings['ibram-config']['desaparecimento']),
+            'temporario'=>MappingImportDataSet::hasMap('collections',$settings['ibram-config']['temporario'])
+        ];
+        update_option('ibram-tainacan',$array_mapping);
+    }
 
     /**
      * @param $collection
@@ -151,7 +170,7 @@ class PersistMethodsImportDataSet{
      * @param $collection_settings
      */
     public static function collectionMetas($collection_id,$collection_post,$collection_settings){
-        update_post_meta($collection_id, 'socialdb_collection_default_ordering',$collection_settings['default_ordenation']);
+        //valores q podem ser replicados de database para database
         update_post_meta($collection_id, 'socialdb_collection_address',$collection_settings['address']);
         update_post_meta($collection_id, 'socialdb_collection_ordenation_form',$collection_settings['ordenation_form']);
         update_post_meta($collection_id, 'socialdb_collection_license',$collection_settings['license']);
@@ -184,11 +203,34 @@ class PersistMethodsImportDataSet{
         update_post_meta($collection_id, 'socialdb_collection_color_scheme', ( $collection_settings['color_scheme']) ? serialize( $collection_settings['color_scheme']) : '');
         update_post_meta($collection_id, 'socialdb_collection_slideshow_time',$collection_settings['slideshow_time']);
         update_post_meta($collection_id, 'socialdb_collection_use_prox_mode',$collection_settings['use_prox_mode']);
-        update_post_meta($collection_id, 'socialdb_collection_latitude_meta',$collection_settings['latidude_meta']);
-        update_post_meta($collection_id, 'socialdb_collection_longitude_meta',$collection_settings['socialdb_collection_longitude_meta']);
+
+        //ordenacao padrao
+        update_post_meta($collection_id, 'socialdb_collection_default_ordering',MappingImportDataSet::hasMap('properties', $collection_settings['default_ordenation']));
+
+        // latitude
+        update_post_meta($collection_id, 'socialdb_collection_latitude_meta',MappingImportDataSet::hasMap('properties', $collection_settings['latidude_meta']));
+
+        // longitude
+        update_post_meta($collection_id, 'socialdb_collection_longitude_meta',MappingImportDataSet::hasMap('properties', $collection_settings['longitude_meta']));
+
         //privacidade
         wp_set_object_terms($collection_id,get_term_by('slug',$collection_settings['privacity'][0]['slug'],'socialdb_collection_type')->term_id,'socialdb_collection_type');
+
         //permissions
+        self::updatePermissionsCollection($collection_id,$collection_settings);
+
+        // filtros
+        self::updateFiltersCollection($collection_id,$collection_settings);
+
+        // table metas
+        self::updateTableMetasCollection($collection_id,$collection_settings);
+    }
+
+    /**
+     * @param $collection_id
+     * @param $collection_settings
+     */
+    public static function updatePermissionsCollection($collection_id,$collection_settings){
         update_post_meta($collection_id, 'socialdb_collection_permission_create_category',$collection_settings['permissions']['create_category']);
         update_post_meta($collection_id, 'socialdb_collection_permission_edit_category', $collection_settings['permissions']['edit_category']);
         update_post_meta($collection_id, 'socialdb_collection_permission_delete_category', $collection_settings['permissions']['delete_category']);
@@ -213,15 +255,56 @@ class PersistMethodsImportDataSet{
         update_post_meta($collection_id, 'socialdb_collection_permission_create_property_term', $collection_settings['permissions']['create_property_term']);
         update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_term', $collection_settings['permissions']['edit_property_term']);
         update_post_meta($collection_id, 'socialdb_collection_permission_delete_property_term', $collection_settings['permissions']['delete_property_term']);
+    }
 
-        // filtros
+    /**
+     * @param $collection_id
+     * @param $collection_settings
+     */
+    public static function updateFiltersCollection($collection_id,$collection_settings){
+        delete_post_meta($collection_id, 'socialdb_collection_facets');
         foreach ($collection_settings['filters'] as $filter) {
-            
-        }
+            $facet_id = MappingImportDataSet::hasMap('properties',$filter['id']);
+            $facet_id = (!$facet_id) ? MappingImportDataSet::hasMap('categories',$filter['id']) : $facet_id;
+            $facet_id = (!$facet_id && !is_numeric($filter['id'])) ? $filter['id']: $facet_id;
 
-        // table metas
-        // latitude
-        // longitude
+            //se for boolean deve continuar
+            if(!$facet_id)
+                continue;
+
+            add_post_meta($collection_id, 'socialdb_collection_facets', $facet_id);
+            update_post_meta($collection_id, 'socialdb_collection_facet_' . $facet_id . '_orientation', (isset($filter['orientation'])) ? $filter['orientation'] : '');
+            update_post_meta($collection_id, 'socialdb_collection_facet_' . $facet_id . '_widget', $filter['widget']);
+            update_post_meta($collection_id, 'socialdb_collection_facet_' . $facet_id . '_priority', (isset($filter['priority'])) ? $filter['priority'] : '0');
+
+            if(isset($filter['color']))
+                update_post_meta($collection_id, 'socialdb_collection_facet_' . $facet_id . '_color', $filter['color']);
+
+            if(isset($filter['range_options']))
+                update_post_meta($collection_id, 'socialdb_collection_facet_' . $facet_id . '_range_options', $filter['range_options']);
+
+            if(isset($filter['ordenation']))
+             update_post_meta($collection_id, 'socialdb_collection_facet_' . $facet_id . '_ordenation',  $filter['ordenation']);
+        }
+    }
+
+    /**
+     * @param $collection_id
+     * @param $collection_settings
+     */
+    public static function updateTableMetasCollection($collection_id,$collection_settings){
+        $new_array = [];
+        if(isset($collection_settings['table_metas']) && empty($collection_settings['table_metas'])){
+            foreach ($collection_settings['table_metas'] as $table_meta) {
+                $json = str_replace("\\",'',$table_meta);
+                $decode = json_decode($json);
+                //a linha do novo table meta
+                $new_meta = ['id'=>MappingImportDataSet::hasMap('properties',$decode->id),'order'=>$decode->order,'tipo'=>$decode->property_data ];
+                $new_array[] = json_encode($new_meta);
+            }
+            update_post_meta($collection_id,'socialdb_collection_table_metas',base64_encode(serialize($new_array)));
+
+        }
     }
 
     /**
@@ -683,4 +766,17 @@ class PersistMethodsImportDataSet{
         endif;
         update_post_meta($collection_id, 'socialdb_collection_update_tab_organization',  serialize($array));
     }
+
+    /**
+     * @param $table
+     * @param $meta_id
+     * @param $meta_value
+     */
+    public static function saveMetaById($table,$meta_id,$meta_value){
+        global $wpdb;
+        $table = ($table === 'post') ? $wpdb->postmeta : $wpdb->termmeta;
+        $query = "UPDATE $wpdb->postmeta SET meta_value = '".$meta_value."' WHERE meta_id = ".$meta_id;
+        $wpdb->get_results($query);
+    }
+
 }
