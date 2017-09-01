@@ -13,8 +13,9 @@ class PersistMethodsImportDataSet{
      * @return int|WP_Error
      */
     public static function manageCollection($collection){
-         $collection_post = $collection['collection'];
-         $collection_settings = $collection['metadata'];
+         $collection_post = $collection['filters']['collection'];
+         $collection_settings = $collection['filters']['metadata'];
+         $collection_metadata = $collection['metadata'];
          $has_id = MappingImportDataSet::hasMap('collections',$collection_post['ID']);
          $post = array(
             'post_title' => $collection_post['post_title'],
@@ -39,23 +40,123 @@ class PersistMethodsImportDataSet{
              update_post_meta($collection_id, 'socialdb_collection_object_type', $object_type);
          }
 
+         // atualizando os metadados
+         self::collectionTabProperties($collection_id, $category_root_id, $collection_metadata);
+
+         //atualizando os valores dos metadados da colecao
+
          update_post_meta($collection_id,'socialdb_token',IBRAM_VERSION);
          return $collection_id;
     }
 
     /**
      * @param $collection_id
+     * @param $category_root_id
+     * @param $collection_metadata
+     */
+    public function collectionTabProperties($collection_id, $category_root_id, $collection_metadata){
+        $ids_metadados = [];
+        if($collection_metadata){
+            foreach ($collection_metadata as $tab) {
+                if($tab['tab-id'] === 'default'){
+                    $tab_id = 'default';
+                    update_post_meta($collection_id, 'socialdb_collection_default_tab', $tab['tab-name']);
+                }else if(MappingImportDataSet::hasMap('tabs',$tab['tab-id'])){
+                    global $wpdb;
+                    $tab_id = MappingImportDataSet::hasMap('tabs',$tab['tab-id']);
+                    $query = "UPDATE $wpdb->postmeta SET meta_value = '".$tab['tab-name']."' WHERE meta_id = ".$tab_id;
+                    $wpdb->get_results($query);
+                }else{
+                    global $wpdb;
+                    add_post_meta($collection_id, 'socialdb_collection_tab', $tab['tab-name']);
+                    $tab_id = $wpdb->insert_id;
+                    MappingImportDataSet::addMap('tabs',$tab['tab-id'],$tab_id);
+                }
+
+                //metadados
+                if(is_array($tab['tab-properties'])){
+                    foreach ($tab['tab-properties'] as $metadata) {
+                        //metadado fixo
+                        if(strpos($metadata['slug'],'socialdb_property_fixed')!==false){
+                            $property = get_term_by('slug',$metadata['slug'],'socialdb_property_type');
+                            $id = $property->term_id;
+                            //alterando o label
+                            $labels_collection =  get_post_meta($collection_id, 'socialdb_collection_fixed_properties_labels', true);
+                            if($labels_collection):
+                                $array = unserialize($labels_collection);
+                                if($metadata['name']!=$property->name):
+                                    $array[ $property->term_id ] = $metadata['name'];
+                                elseif($array[  $property->term_id ]):
+                                    unset($array[ $property->term_id ]);
+                                endif;
+                                update_post_meta($collection_id, 'socialdb_collection_fixed_properties_labels',  serialize($array));
+                            elseif($metadata['name']!=$property->name):
+                                update_post_meta($collection_id, 'socialdb_collection_fixed_properties_labels',  serialize([ $property->term_id=>$metadata['name']]));
+                            endif;
+
+                            //demais campos
+                            update_post_meta($collection_id, 'socialdb_collection_property_'.$id.'_required', $metadata['required']);
+                            update_post_meta($collection_id, 'socialdb_collection_property_'.$id.'_mask_key', $metadata['is_mask']);
+
+                            ///visibilidade
+                            $meta = get_post_meta($collection_id, 'socialdb_collection_fixed_properties_visibility', true);
+                            if ($meta && $meta != ''):
+                                $array = explode(',', $meta);
+                                if (is_array($array) && count($array) > 0 && ($key = array_search($id, $array)) !== false):
+                                    unset($array[$key]);
+                                elseif (is_array($array)):
+                                    $array[] =$id;
+                                endif;
+                            else:
+                                $array = [];
+                                $array[] = $id;
+                            endif;
+                            update_post_meta($collection_id, 'socialdb_collection_fixed_properties_visibility', implode(',', $array));
+                        // metadado do repositorio porem nao fixo
+                        }else if($metadata['metadata']['is_repository_property']){
+                            $id = MappingImportDataSet::hasMap('properties',$metadata['id']);
+                            if($id) {
+                                //demais campos
+                                update_post_meta($collection_id, 'socialdb_collection_property_' . $id . '_required', $metadata['required']);
+                                update_post_meta($collection_id, 'socialdb_collection_property_' . $id . '_mask_key', $metadata['is_mask']);
+                            }
+                        //metadado noraml
+                        }else{
+                            $has_id = MappingImportDataSet::hasMap('properties',$metadata['id']);
+                            if($has_id){
+                                $id = $has_id;
+                                self::updateProperty($has_id,$metadata,IBRAM_VERSION);
+                            }else{
+                                $id = self::createProperty($metadata,IBRAM_VERSION);
+                                add_term_meta($category_root_id,'socialdb_category_property_id',$id);
+                            }
+                        }
+                        //atualizando as abas
+                        self::updateTabOrganization($collection_id,$tab_id,$id);
+                        $ids_metadados[$tab_id][] = $id;
+                    }
+                }
+            }
+
+            // atualizar os valores da ordenacao
+            update_post_meta($collection_id, 'socialdb_collection_properties_ordenation', serialize($ids_metadados));
+        }
+    }
+
+    /**
+     * metodo que atualiza os metas da colecao
+     *
+     * @param $collection_id
      * @param $collection_post
      * @param $collection_settings
      */
-    public function collectionMetas($collection_id,$collection_post,$collection_settings){
+    public static function collectionMetas($collection_id,$collection_post,$collection_settings){
         update_post_meta($collection_id, 'socialdb_collection_default_ordering',$collection_settings['default_ordenation']);
         update_post_meta($collection_id, 'socialdb_collection_address',$collection_settings['address']);
         update_post_meta($collection_id, 'socialdb_collection_ordenation_form',$collection_settings['ordenation_form']);
         update_post_meta($collection_id, 'socialdb_collection_license',$collection_settings['license']);
         update_post_meta($collection_id, 'socialdb_collection_columns',$collection_settings['columns']);
         update_post_meta($collection_id, 'socialdb_collection_allow_hierarchy',$collection_settings['allow_hierarchy']);
-
         $parent = $collection_settings['collection_parent'];
         if($parent){
             $has_id_parent = MappingImportDataSet::hasMap('collections',$parent);
@@ -67,13 +168,9 @@ class PersistMethodsImportDataSet{
                 MappingImportDataSet::addMap('references-collections',$wpdb->insert_id, $collection_settings['collection_parent']);
             }
         }
-
-
-
         update_post_meta($collection_id, 'socialdb_collection_license_pattern',$collection_settings['license_pattern']);
         update_post_meta($collection_id, 'socialdb_collection_license_enabled',$collection_settings['license_enabled']);
         update_post_meta($collection_id, 'socialdb_collection_list_mode',$collection_settings['list_mode']);
-        //update_post_meta($collection_id, 'socialdb_collection_address',$collection_settings['add_watermark']);
         update_post_meta($collection_id, 'socialdb_collection_moderation_type',$collection_settings['moderation_type']);
         update_post_meta($collection_id, 'socialdb_collection_object_name',$collection_settings['item_name']);
         update_post_meta($collection_id, 'socialdb_collection_download_control',$collection_settings['download_control']);
@@ -84,44 +181,49 @@ class PersistMethodsImportDataSet{
         update_post_meta($collection_id, 'socialdb_default_color_scheme',$collection_settings['default_color_scheme']);
         update_post_meta($collection_id, 'socialdb_collection_show_header',$collection_settings['show_header']);
         update_post_meta($collection_id, 'socialdb_collection_add_item',$collection_settings['add_item']);
-        //update_post_meta($collection_id, 'socialdb_collection_vinculated_object',$collection_settings['vinculated_items']);
-
-        update_post_meta($collection_id, 'socialdb_collection_moderator',$collection_settings['moderators']);
-
         update_post_meta($collection_id, 'socialdb_collection_color_scheme', ( $collection_settings['color_scheme']) ? serialize( $collection_settings['color_scheme']) : '');
         update_post_meta($collection_id, 'socialdb_collection_slideshow_time',$collection_settings['slideshow_time']);
         update_post_meta($collection_id, 'socialdb_collection_use_prox_mode',$collection_settings['use_prox_mode']);
         update_post_meta($collection_id, 'socialdb_collection_latitude_meta',$collection_settings['latidude_meta']);
         update_post_meta($collection_id, 'socialdb_collection_longitude_meta',$collection_settings['socialdb_collection_longitude_meta']);
-        //after
-        //update_post_meta($collection_id, 'socialdb_collection_table_metas',serialize($collection_settings['table_metas']));
-        wp_set_object_terms();
+        //privacidade
+        wp_set_object_terms($collection_id,get_term_by('slug',$collection_settings['privacity'][0]['slug'],'socialdb_collection_type')->term_id,'socialdb_collection_type');
         //permissions
-        update_post_meta($collection_id, 'socialdb_collection_permission_create_category', (string) $xml->permissions->socialdb_collection_permission_create_category);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_category', (string) $xml->permissions->socialdb_collection_permission_edit_category);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_category', (string) $xml->permissions->socialdb_collection_permission_delete_category);
-        update_post_meta($collection_id, 'socialdb_collection_permission_add_classification', (string) $xml->permissions->socialdb_collection_permission_add_classification);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_classification', (string) $xml->permissions->socialdb_collection_permission_delete_classification);
-        update_post_meta($collection_id, 'socialdb_collection_permission_create_object', (string) $xml->permissions->socialdb_collection_permission_create_object);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_object', (string) $xml->permissions->socialdb_collection_permission_delete_object);
-        update_post_meta($collection_id, 'socialdb_collection_permission_create_property_data', (string) $xml->permissions->socialdb_collection_permission_create_property_data);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_data', (string) $xml->permissions->socialdb_collection_permission_edit_property_data);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_property_data', (string) $xml->permissions->socialdb_collection_permission_delete_property_data);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_data_value', (string) $xml->permissions->socialdb_collection_permission_edit_property_data_value);
-        update_post_meta($collection_id, 'socialdb_collection_permission_create_property_object', (string) $xml->permissions->socialdb_collection_permission_create_property_object);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_object', (string) $xml->permissions->socialdb_collection_permission_edit_property_object);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_property_object', (string) $xml->permissions->socialdb_collection_permission_delete_property_object);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_object_value', (string) $xml->permissions->socialdb_collection_permission_edit_property_object_value);
-        update_post_meta($collection_id, 'socialdb_collection_permission_create_comment', (string) $xml->permissions->socialdb_collection_permission_create_comment);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_comment', (string) $xml->permissions->socialdb_collection_permission_edit_comment);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_comment', (string) $xml->permissions->socialdb_collection_permission_delete_comment);
-        update_post_meta($collection_id, 'socialdb_collection_permission_create_tags', (string) $xml->permissions->socialdb_collection_permission_delete_comment);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_tags', (string) $xml->permissions->socialdb_collection_permission_edit_tags);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_tags', (string) $xml->permissions->socialdb_collection_permission_delete_tags);
-        update_post_meta($collection_id, 'socialdb_collection_permission_create_property_term', (string) $xml->permissions->socialdb_collection_permission_create_property_term);
-        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_term', (string) $xml->permissions->socialdb_collection_permission_edit_property_term);
-        update_post_meta($collection_id, 'socialdb_collection_permission_delete_property_term', (string) $xml->permissions->socialdb_collection_permission_delete_property_term);
+        update_post_meta($collection_id, 'socialdb_collection_permission_create_category',$collection_settings['permissions']['create_category']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_category', $collection_settings['permissions']['edit_category']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_category', $collection_settings['permissions']['delete_category']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_add_classification',$collection_settings['permissions']['add_classification']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_classification', $collection_settings['permissions']['delete_classification']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_create_object',$collection_settings['permissions']['create_object']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_object', $collection_settings['permissions']['delete_object']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_create_property_data',$collection_settings['permissions']['create_property_data']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_data', $collection_settings['permissions']['edit_property_data']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_property_data',$collection_settings['permissions']['delete_property_data']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_data_value', $collection_settings['permissions']['edit_property_data_value']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_create_property_object', $collection_settings['permissions']['create_property_object']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_object', $collection_settings['permissions']['edit_property_object']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_property_object', $collection_settings['permissions']['delete_property_object']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_object_value',$collection_settings['permissions']['edit_property_object_value']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_create_comment', $collection_settings['permissions']['create_comment']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_comment',$collection_settings['permissions']['edit_comment']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_comment', $collection_settings['permissions']['delete_comment']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_create_tags', $collection_settings['permissions']['create_tags']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_tags', $collection_settings['permissions']['edit_tags']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_tags', $collection_settings['permissions']['delete_tags']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_create_property_term', $collection_settings['permissions']['create_property_term']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_edit_property_term', $collection_settings['permissions']['edit_property_term']);
+        update_post_meta($collection_id, 'socialdb_collection_permission_delete_property_term', $collection_settings['permissions']['delete_property_term']);
+
+        // filtros
+        foreach ($collection_settings['filters'] as $filter) {
+            
+        }
+
+        // table metas
+        // latitude
+        // longitude
     }
+
     /**
      * metodo que atualiza os metadados fixos
      * @param $property
@@ -228,7 +330,7 @@ class PersistMethodsImportDataSet{
         $array = wp_update_term($term_id,'socialdb_property_type');
         if (!is_wp_error($array) && isset($array['term_id'])) {
             self::updateMetasCommoms($array['term_id'],$property,$token,$is_repo,$is_compound);
-            self::updateSpecificMeta($array['term_id'],$property,$property['type'],$token);
+            self::updateSpecificMeta($array['term_id'],$property,$property['type'],$token,$is_repo,$is_compound);
         }
         return $array['term_id'];
     }
@@ -240,20 +342,22 @@ class PersistMethodsImportDataSet{
      * @param $property
      * @param $type
      * @param $token
+     * @param $is_repo
+     * @param $is_compound
      */
-    public function updateSpecificMeta($term_id,$property,$type,$token){
+    public function updateSpecificMeta($term_id,$property,$type,$token,$is_repo,$is_compound){
         $return = $property['metadata'];
         $data = ['text', 'textarea', 'date', 'number', 'numeric', 'auto-increment', 'user'];
         $term = ['selectbox', 'radio', 'checkbox', 'tree', 'tree_checkbox', 'multipleselect'];
         $object = (isset($return['object_category_id']) && !empty($return['object_category_id'])) ? true : false;
         if (in_array($type, $data) && !$object) {
-            return self::updateMetasTextProperty($$term_id,$property);
+             self::updateMetasTextProperty($$term_id,$property);
         } else if (in_array($type, $term) && !$object) {
-            return self::updateMetasTermProperty($term_id,$property,$token,$is_repo);
+             self::updateMetasTermProperty($term_id,$property,$token,$is_repo);
         } else if ($object) {
-            return self::updateMetasObjectProperty($term_id,$property);
+             self::updateMetasObjectProperty($term_id,$property);
         } else if ($type == 'compound') {
-            return self::updateMetasTermCompound($term_id,$property,$token,$is_repo);
+             self::updateMetasTermCompound($term_id,$property,$token,$is_repo);
         }
     }
 
@@ -557,5 +661,26 @@ class PersistMethodsImportDataSet{
             $type = 'socialdb_property_term';
         }
         return get_term_by('slug',$type,'socialdb_property_type');
+    }
+
+    /**
+     *
+     *  metodo que atualiza as abas de uma propriedade
+     *
+     * function update_tab_organization($data)
+     * @param int $collection_id
+     * @param int $tab_id
+     * @param int $property_id
+     * @autor: Eduardo Humberto
+     */
+    public static function updateTabOrganization($collection_id,$tab_id,$property_id) {
+        $array = unserialize(get_post_meta($collection_id, 'socialdb_collection_update_tab_organization',true));
+        if($array && is_array($array)):
+            $array[0][$property_id] = $tab_id;
+        else:
+            $array = [];
+            $array[0][$property_id] = $tab_id;
+        endif;
+        update_post_meta($collection_id, 'socialdb_collection_update_tab_organization',  serialize($array));
     }
 }
