@@ -36,6 +36,9 @@ class MappingImportDataSet{
      * @param $id_tainacan
      */
     public static function addMap($type, $id_file, $id_tainacan){
+        if(!is_array(self::$map)){
+            self::initMap();
+        }
         self::$map[$type][$id_file] = $id_tainacan;
     }
 

@@ -33,7 +33,7 @@ define( 'IBRAM_PATH', plugin_dir_path( __FILE__ ) );
  */
 function activate_ibram_tainacan() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-ibram-tainacan-activator.php';
-	//require_once plugin_dir_path(__FILE__) . 'public/class-import-data-set.php';
+	require_once plugin_dir_path(__FILE__) . 'public/class-import-data-set.php';
 	Ibram_Tainacan_Activator::activate();
 }
 
@@ -42,6 +42,7 @@ function activate_ibram_tainacan() {
  */
 function deactivate_ibram_tainacan() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-ibram-tainacan-deactivator.php';
+    require_once plugin_dir_path(__FILE__) . 'public/class-import-data-set.php';
 	Ibram_Tainacan_Deactivator::deactivate();
 }
 

@@ -63,6 +63,7 @@ class PersistMethodsImportDataSet{
          self::collectionTabProperties($collection_id, $category_root_id, $collection_metadata);
 
          //atualizando os valores dos metadados da colecao
+         self::collectionMetas($collection_id,$collection_post,$collection_settings);
 
          update_post_meta($collection_id,'socialdb_token',IBRAM_VERSION);
          return $collection_id;
@@ -73,7 +74,7 @@ class PersistMethodsImportDataSet{
      * @param $category_root_id
      * @param $collection_metadata
      */
-    public function collectionTabProperties($collection_id, $category_root_id, $collection_metadata){
+    public static function collectionTabProperties($collection_id, $category_root_id, $collection_metadata){
         $ids_metadados = [];
         if($collection_metadata){
             foreach ($collection_metadata as $tab) {
@@ -105,7 +106,7 @@ class PersistMethodsImportDataSet{
                                 $array = unserialize($labels_collection);
                                 if($metadata['name']!=$property->name):
                                     $array[ $property->term_id ] = $metadata['name'];
-                                elseif($array[  $property->term_id ]):
+                                elseif(isset($array[  $property->term_id ])):
                                     unset($array[ $property->term_id ]);
                                 endif;
                                 update_post_meta($collection_id, 'socialdb_collection_fixed_properties_labels',  serialize($array));
@@ -136,8 +137,8 @@ class PersistMethodsImportDataSet{
                             $id = MappingImportDataSet::hasMap('properties',$metadata['id']);
                             if($id) {
                                 //demais campos
-                                update_post_meta($collection_id, 'socialdb_collection_property_' . $id . '_required', $metadata['required']);
-                                update_post_meta($collection_id, 'socialdb_collection_property_' . $id . '_mask_key', $metadata['is_mask']);
+                                update_post_meta($collection_id, 'socialdb_collection_property_' . $id . '_required', (isset($metadata['required'])) ? $metadata['required'] : 'false');
+                                update_post_meta($collection_id, 'socialdb_collection_property_' . $id . '_mask_key', (isset($metadata['is_mask'])) ? $metadata['is_mask'] : '');
                             }
                         //metadado noraml
                         }else{
@@ -294,7 +295,10 @@ class PersistMethodsImportDataSet{
      */
     public static function updateTableMetasCollection($collection_id,$collection_settings){
         $new_array = [];
-        if(isset($collection_settings['table_metas']) && empty($collection_settings['table_metas'])){
+        if(isset($collection_settings['table_metas']) && empty($collection_settings['table_metas']) && $collection_settings['table_metas']){
+            if(!is_array($collection_settings['table_metas']))
+                $collection_settings['table_metas'] = [$collection_settings['table_metas']];
+
             foreach ($collection_settings['table_metas'] as $table_meta) {
                 $json = str_replace("\\",'',$table_meta);
                 $decode = json_decode($json);
@@ -319,8 +323,8 @@ class PersistMethodsImportDataSet{
 
         update_term_meta($term->term_id, 'socialdb_property_real_name', $term->name );
         update_term_meta($term->term_id, 'socialdb_property_visibility', ($property['visibility'] === 'on') ? 'show' : 'off' );
-        update_term_meta($term->term_id, 'socialdb_property_help', ($property['help']) ? $property['help'] : '' );
-        update_term_meta($term->term_id, 'socialdb_property_locked', ($property['locked']) ? 'true' : 'false' );
+        update_term_meta($term->term_id, 'socialdb_property_help', (isset($property['help'])) ? $property['help'] : '' );
+        update_term_meta($term->term_id, 'socialdb_property_locked', (isset($property['locked'])) ? 'true' : 'false' );
         update_term_meta($term->term_id, 'socialdb_property_data_mask', ($property['is_mask']) ? $property['is_mask'] : '' );
         update_term_meta($term->term_id, 'socialdb_property_required', ($property['required']) ? 'true' : 'false' );
         MappingImportDataSet::addMap('properties',$property['id'],$term->term_id);
@@ -344,8 +348,8 @@ class PersistMethodsImportDataSet{
         //metas comuns e especificos
         if (!is_wp_error($array) && isset($array['term_id'])) {
             $return = $property['metadata'];
-            self::updateMetasCommoms($return,$token,$is_repo,$is_compound);
-            self::updateSpecificMeta($array['term_id'],$property,$property['type'],$token);
+            self::updateMetasCommoms($array['term_id'],$property,$token,$is_repo,$is_compound);
+            self::updateSpecificMeta($array['term_id'],$property,$property['type'],$token,$is_repo,$is_compound);
                 /*foreach ($metas as $meta) {
                     $ids_category = ['socialdb_property_object_category_id', 'socialdb_property_term_root'];
                     if (in_array($meta['key'], $ids_category) && trim($meta['value']) != '') {
@@ -395,6 +399,10 @@ class PersistMethodsImportDataSet{
                     }
                 } */
         }
+
+        if(is_wp_error($array)){
+            var_dump('createProperty',$array,$property);
+        }
         return $array['term_id'];
     }
 
@@ -428,13 +436,13 @@ class PersistMethodsImportDataSet{
      * @param $is_repo
      * @param $is_compound
      */
-    public function updateSpecificMeta($term_id,$property,$type,$token,$is_repo,$is_compound){
+    public static function updateSpecificMeta($term_id,$property,$type,$token,$is_repo,$is_compound){
         $return = $property['metadata'];
         $data = ['text', 'textarea', 'date', 'number', 'numeric', 'auto-increment', 'user'];
         $term = ['selectbox', 'radio', 'checkbox', 'tree', 'tree_checkbox', 'multipleselect'];
         $object = (isset($return['object_category_id']) && !empty($return['object_category_id'])) ? true : false;
         if (in_array($type, $data) && !$object) {
-             self::updateMetasTextProperty($$term_id,$property);
+             self::updateMetasTextProperty($term_id,$property);
         } else if (in_array($type, $term) && !$object) {
              self::updateMetasTermProperty($term_id,$property,$token,$is_repo);
         } else if ($object) {
@@ -451,7 +459,7 @@ class PersistMethodsImportDataSet{
      * @param bool $is_repo
      * @param bool $is_compound
      */
-    public function updateMetasCommoms($term_id,$property,$token,$is_repo = false,$is_compound = false){
+    public static function updateMetasCommoms($term_id,$property,$token,$is_repo = false,$is_compound = false){
         $return = $property['metadata'];
         MappingImportDataSet::addMap( 'properties', $property['id'], $term_id);
         //token dessa versao
@@ -470,8 +478,10 @@ class PersistMethodsImportDataSet{
 
         //usado pelas categorias
         delete_term_meta($term_id, 'socialdb_property_used_by_categories');
-        foreach ($return['used_by_categories'] as $term_reference_id){
-            add_term_meta($term_id, 'socialdb_property_used_by_categories', MappingImportDataSet::hasMap('categories',$term_reference_id));
+        if(is_array($return['used_by_categories'])) {
+            foreach ($return['used_by_categories'] as $term_reference_id) {
+                add_term_meta($term_id, 'socialdb_property_used_by_categories', MappingImportDataSet::hasMap('categories', $term_reference_id));
+            }
         }
 
         //visualizacao
@@ -527,7 +537,7 @@ class PersistMethodsImportDataSet{
      * @param $term_id
      * @param $property
      */
-    public function updateMetasObjectProperty($term_id,$property){
+    public static function updateMetasObjectProperty($term_id,$property){
         $return = $property['metadata'];
 
         //propriedades para fazer a busca
@@ -567,7 +577,7 @@ class PersistMethodsImportDataSet{
         if(!$return['object_category_id']){
             update_term_meta($term_id, 'socialdb_property_object_category_id', '');
         }else{
-            $ids_categories = explode(',',$return['object_category_id']);
+            $ids_categories = (!is_array($return['object_category_id'])) ? explode(',',$return['object_category_id']) : $return['object_category_id'];
             $ids_new = [];
             $has_reference = false;
             foreach ($ids_categories as $id_category) {
@@ -621,7 +631,7 @@ class PersistMethodsImportDataSet{
      * @param $token
      * @param $is_repo
      */
-    public function updateMetasTermProperty($term_id,$property,$token,$is_repo){
+    public static function updateMetasTermProperty($term_id,$property,$token,$is_repo){
         $return = $property['metadata'];
 
         update_term_meta($term_id, 'socialdb_property_term_cardinality',  ($return['cardinality']) ? $return['cardinality']: '1');
@@ -639,7 +649,7 @@ class PersistMethodsImportDataSet{
             }
             //obsevo a taxonomia criada
             foreach ($return['categories'] as $category) {
-                $has_id = MappingImportDataSet::hasMap('categories',$category['id']);
+                $has_id = MappingImportDataSet::hasMap('categories',$category['term']['term_id']);
                 self::updateCategory($category,$token,$taxonomy_id,($has_id) ? $has_id : false);
             }
         }else{
@@ -653,7 +663,7 @@ class PersistMethodsImportDataSet{
      * @param $token
      * @param $is_repo
      */
-    public function updateMetasTermCompound($term_id,$property,$token,$is_repo){
+    public static function updateMetasTermCompound($term_id,$property,$token,$is_repo){
         $return = $property['metadata'];
         update_term_meta($term_id, 'socialdb_property_compounds_cardinality',  ($return['cardinality']) ? $return['cardinality']: '1');
         $ids = [];
@@ -681,6 +691,10 @@ class PersistMethodsImportDataSet{
             $args = array('parent' => ( $parent ) ? $parent : get_term_by('slug','socialdb_category','socialdb_category_type')->term_id ,
                 'slug' => self::generateSlug(trim($category['term']['name'])));
             $array = wp_insert_term($category['term']['name'], 'socialdb_category_type', $args);
+            if(is_wp_error($array)){
+                echo '<pre>';
+                var_dump($array,$category,$args);
+            }
             update_term_meta($array['term_id'],'socialdb_category_owner',get_current_user_id());
             if(isset($category['term']['term_id']))
                 MappingImportDataSet::addMap( 'categories', $category['term']['term_id'], $array['term_id']);
@@ -690,7 +704,7 @@ class PersistMethodsImportDataSet{
         }
 
         //propriedades desta categoria
-        if( $category['properties-children']){
+        if(isset($category['properties-children']) && $category['properties-children']){
             delete_term_meta($array['term_id'],'socialdb_category_property_id');
             foreach ( $category['properties-children'] as $child){
                 $has_id = MappingImportDataSet::hasMap('properties',$child['id']);
@@ -723,7 +737,7 @@ class PersistMethodsImportDataSet{
      * @author Eduardo Humberto
      */
     public static function generateSlug($string) {
-        return sanitize_title(remove_accent($string)) . "_" . time() . rand(0, 100);
+        return sanitize_title(remove_accent($string)) . "_" . time().rand(0,1000);
     }
 
     /**
@@ -742,6 +756,8 @@ class PersistMethodsImportDataSet{
             $type = 'socialdb_property_data';
         } else if (in_array($property['type'], $term)) {
             $type = 'socialdb_property_term';
+        }else{
+            var_dump('else',$property);
         }
         return get_term_by('slug',$type,'socialdb_property_type');
     }
