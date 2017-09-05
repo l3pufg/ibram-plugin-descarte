@@ -13,13 +13,17 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
 
     public static function start(){
         error_reporting(E_ALL);
-        error_log('Error creating the CE Labels Plugin db tables!', 0);
         // busco os dados do repositorio metadados/informacoes gerais
         $repository = HelperFileImportDataSet::getRepository();
         // busco os dados das colecoes  metadados/informacoes gerais
         $collections = HelperFileImportDataSet::getCollections();
         // inicio o mapeamento ou busco o ja existente
         MappingImportDataSet::initMap();
+
+        $option = unserialize(get_option('mapping-tainacan-import'));
+        if($option){
+            return true;
+        }
 
         // adicionando ou atualizando os metadados do repositorio
         self::proccessRepositoryProperties($repository);
@@ -114,15 +118,18 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
                      foreach ($explode as $p) {
                          if(strpos($p,'_reference')!==false){
                              $p = str_replace('_reference','',$p);
-                             $values[]  =  $map['categories'][$p];
+                             if(is_numeric($p))
+                                 $values[]  =  $map['categories'][$p];
                          }else{
-                             $values[]  =  $p;
+                             if(is_numeric($p))
+                                $values[]  =  $p;
                          }
                          PersistMethodsImportDataSet::saveMetaById('term',$meta_id,implode(',',$values));
                      }
                  }else{
                      $old_id = str_replace('_reference','',$old_id);
-                     PersistMethodsImportDataSet::saveMetaById('term',$meta_id,$map['categories'][$old_id]);
+                     if(is_numeric($old_id))
+                        PersistMethodsImportDataSet::saveMetaById('term',$meta_id,$map['categories'][$old_id]);
                  }
              }
          }
@@ -135,7 +142,7 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
          $map = MappingImportDataSet::$map;
          $token = IBRAM_VERSION;
          $nopes = [get_term_by('slug','socialdb_category','socialdb_category_type')->term_id,get_term_by('slug','socialdb_taxonomy','socialdb_category_type')->term_id];
-         if ($map) {
+         if ($map && is_array($map)) {
              foreach ($map as $index => $array) {
                  if($index == 'collections'){
                      foreach ($array as $id_blog) {
@@ -197,69 +204,119 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
                 $menu_id = $menu->term_id;
             }
 
-            //if(!$posts || empty($posts)){
-                $bens_id =  self::createPostMenu('Bens',1,$menu_id);
-                self::addMetasMenu($bens_id,0,'/#');
-
+            if(!MappingImportDataSet::hasMap('menu', 1)){
+                $bens_id = self::createPostMenu('Bens', 1, $menu_id);
+                self::addMetasMenu($bens_id, 0, '/#');
+                MappingImportDataSet::addMap('menu', 1, $bens_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 2)){
                 $museologico_id = self::createPostMenu('Museológico',2,$menu_id);
                 self::addMetasMenu($museologico_id,$bens_id,'/#');
-
+                MappingImportDataSet::addMap('menu', 2, $museologico_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 3)){
                 // Filhos de museologico
                 $permanente_id = self::createPostMenu('Permanente',3,$menu_id);
                 self::addMetasMenu($permanente_id,$museologico_id,'/permanente');
-
+                MappingImportDataSet::addMap('menu', 3, $permanente_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 4)){
                 $temporario_id = self::createPostMenu('Temporário',4,$menu_id);
                 self::addMetasMenu($temporario_id,$museologico_id,'/bem-temporario');
-
+                MappingImportDataSet::addMap('menu', 4, $temporario_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 5)){
                 $colecoes_id = self::createPostMenu('Coleções',5,$menu_id);
                 self::addMetasMenu($colecoes_id,$museologico_id,'/colecoes-2');
-
+                MappingImportDataSet::addMap('menu', 5, $colecoes_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 6)){
                 $conjuntos_id = self::createPostMenu('Conjuntos',6,$menu_id);
                 self::addMetasMenu($conjuntos_id,$museologico_id,'/conjuntos',$menu_id);
-
+                MappingImportDataSet::addMap('menu', 6, $conjuntos_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 7)){
                 //raiz
                 $desdesa_id =  self::createPostMenu('Descarte/Desaparecimento',7,$menu_id);
                 self::addMetasMenu($desdesa_id,0,'/#');
-
+                MappingImportDataSet::addMap('menu', 7, $desdesa_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 8)){
                 $descarte_id = self::createPostMenu('Descarte(Baixa)',8,$menu_id);
                 self::addMetasMenu($descarte_id,$desdesa_id,'/descarte');
-
+                MappingImportDataSet::addMap('menu', 8, $descarte_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 9)){
                 $desaparecimento_id = self::createPostMenu('Desaparecimento',9,$menu_id);
                 self::addMetasMenu($desaparecimento_id,$desdesa_id,'/desaparecimtno');
-
+                MappingImportDataSet::addMap('menu', 9, $desaparecimento_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 10)){
                 //raiz
                 $adm_id =  self::createPostMenu('Administração',10,$menu_id);
                 self::addMetasMenu($adm_id,0,'/#');
-
+                MappingImportDataSet::addMap('menu', 10, $adm_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 11)){
                 $ent_id =  self::createPostMenu('Entidades',11,$menu_id);
                 self::addMetasMenu($ent_id,$adm_id,'/entidades');
-
+                MappingImportDataSet::addMap('menu', 11, $ent_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 12)){
                 $loc_id =  self::createPostMenu('Localização',12,$menu_id);
                 self::addMetasMenu($loc_id,$adm_id,'/localizacao');
-
+                MappingImportDataSet::addMap('menu', 12, $loc_id);
+            }
+            if(!MappingImportDataSet::hasMap('menu', 13)){
                 $matter_id =  self::createPostMenu('Assunto',13,$menu_id);
                 self::addMetasMenu($matter_id,$adm_id,'/assunto');
-
-                $par_id =  self::createPostMenu('Parâmetros do sistema',14,$menu_id);
-                self::addMetasMenu($par_id,$adm_id,'/instituicao-utilizadora/insituição-utilizadora/editar/');
-            //}
+                MappingImportDataSet::addMap('menu', 13, $matter_id);
+            }
+             if(!MappingImportDataSet::hasMap('menu', 14)) {
+                 $par_id = self::createPostMenu('instituicao-utilizadora', 14, $menu_id);
+                 self::addMetasMenu($par_id, $adm_id, '/instituicao-utilizadora/insituição-utilizadora/editar/');
+                 MappingImportDataSet::addMap('menu', 14, $par_id);
+             }
      }
 
      private static function createPostMenu($title,$order,$menu_id){
-            $args = [
-                'post_title'=> $title,
-                'post_type' => 'nav_menu_item',
-                'menu_order' => $order
-            ];
-            $post_id = wp_insert_post($args);
-            wp_set_object_terms($post_id,$menu_id,'nav_menu');
+            $menu = self::get_id_menu($title,OBJECT,'nav_menu_item');
+            if(isset($menu->ID)){
+                $post_id = $menu->ID;
+            }else {
+                $args = [
+                    'post_title' => $title,
+                    'post_type' => 'nav_menu_item',
+                    'menu_order' => $order,
+                    'post_status' => 'publish'
+                ];
+                $post_id = wp_insert_post($args);
+                wp_set_object_terms($post_id, $menu_id, 'nav_menu');
+            }
             return $post_id;
 
      }
 
+     /**
+      *
+      * Funcao que insere o relacionamento de um termo com um objeto
+      *
+      * @param string $post_name O post_name da colecao.
+      * @param string (optional) $output O tipo de retono.
+      * @return WP_POST O post da colecao.
+      */
+      static function get_id_menu($post_title, $output = OBJECT, $type = 'socialdb_collection') {
+         global $wpdb;
+         $post = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type='$type'", trim($post_title)));
+         if ($post)
+             return get_post($post, $output);
+
+         return null;
+     }
+
      private static function addMetasMenu($menu_id,$parent = 0,$url = ''){
-         update_post_meta($menu_id,'_menu_item_url',bloginfo('url').$url);
-         update_post_meta($menu_id,'_menu_item_xfn',bloginfo('url').$url);
+         update_post_meta($menu_id,'_menu_item_url',$url);
+         update_post_meta($menu_id,'_menu_item_xfn',$url);
          update_post_meta($menu_id,'_menu_item_classes','a:1:{i:0;s:0:"";}');
          update_post_meta($menu_id,'_menu_item_target','');
          update_post_meta($menu_id,'_menu_item_object','custom');

@@ -52,15 +52,17 @@ class PersistMethodsImportDataSet{
          $category_root_id = $collection_settings['category_root_id'];
          $has_category_root_id =  MappingImportDataSet::hasMap('categories',$category_root_id);
          if($has_category_root_id){
+             $object_type = $has_category_root_id;
              update_post_meta($collection_id, 'socialdb_collection_object_type', $has_category_root_id);
          }else{
              $args = ['term'=>['name'=> $collection_post['post_title']]];
              $object_type = self::updateCategory($args,IBRAM_VERSION);
              update_post_meta($collection_id, 'socialdb_collection_object_type', $object_type);
+             MappingImportDataSet::addMap( 'categories', $collection_settings['category_root_id'],$object_type);
          }
 
          // atualizando os metadados
-         self::collectionTabProperties($collection_id, $category_root_id, $collection_metadata);
+         self::collectionTabProperties($collection_id, $object_type, $collection_metadata);
 
          //atualizando os valores dos metadados da colecao
          self::collectionMetas($collection_id,$collection_post,$collection_settings);
@@ -198,10 +200,16 @@ class PersistMethodsImportDataSet{
         update_post_meta($collection_id, 'socialdb_collection_visualization_page_category',$collection_settings['visualization_page_category']);
         update_post_meta($collection_id, 'socialdb_collection_habilitate_media',$collection_settings['habilitate_media']);
         update_post_meta($collection_id, 'socialdb_collection_item_visualization',$collection_settings['item_visualization']);
-        update_post_meta($collection_id, 'socialdb_default_color_scheme',$collection_settings['default_color_scheme']);
+
+        $default = unserialize(unserialize($collection_settings['default_color_scheme']));
+        update_post_meta($collection_id, 'socialdb_default_color_scheme',serialize($default));
         update_post_meta($collection_id, 'socialdb_collection_show_header',$collection_settings['show_header']);
-        update_post_meta($collection_id, 'socialdb_collection_add_item',$collection_settings['add_item']);
-        update_post_meta($collection_id, 'socialdb_collection_color_scheme', ( $collection_settings['color_scheme']) ? serialize( $collection_settings['color_scheme']) : '');
+
+        $add_item = unserialize(unserialize(str_replace('\\','',$collection_settings['add_item'])));
+        update_post_meta($collection_id, 'socialdb_collection_add_item',serialize($add_item));
+
+        $color_scheme = unserialize($collection_settings['color_scheme']);
+        update_post_meta($collection_id, 'socialdb_collection_color_scheme', ( $collection_settings['color_scheme']) ? serialize( $color_scheme) : '');
         update_post_meta($collection_id, 'socialdb_collection_slideshow_time',$collection_settings['slideshow_time']);
         update_post_meta($collection_id, 'socialdb_collection_use_prox_mode',$collection_settings['use_prox_mode']);
 
@@ -343,11 +351,10 @@ class PersistMethodsImportDataSet{
     public static function createProperty($property,$token,$is_repo = false,$is_compound = false){
         $type = self::getTainacanTypeProperty($property);
         $array = wp_insert_term($property['name'], 'socialdb_property_type', array('parent' => $type->term_id,
-            'slug' =>  self::generateSlug(trim($property['name']))));
+            'slug' =>  $property['slug'].uniqid()));
 
         //metas comuns e especificos
-        if (!is_wp_error($array) && isset($array['term_id'])) {
-            $return = $property['metadata'];
+        if (!is_wp_error($array) && isset($array['term_id']) && isset($property['metadata'])) {
             self::updateMetasCommoms($array['term_id'],$property,$token,$is_repo,$is_compound);
             self::updateSpecificMeta($array['term_id'],$property,$property['type'],$token,$is_repo,$is_compound);
                 /*foreach ($metas as $meta) {
@@ -419,7 +426,7 @@ class PersistMethodsImportDataSet{
     public static function updateProperty($term_id,$property,$token,$is_repo = false,$is_compound = false){
         $type = self::getTainacanTypeProperty($property);
         $array = wp_update_term($term_id,'socialdb_property_type');
-        if (!is_wp_error($array) && isset($array['term_id'])) {
+        if (!is_wp_error($array) && isset($array['term_id']) && isset($property['metadata'])) {
             self::updateMetasCommoms($array['term_id'],$property,$token,$is_repo,$is_compound);
             self::updateSpecificMeta($array['term_id'],$property,$property['type'],$token,$is_repo,$is_compound);
         }
@@ -746,9 +753,9 @@ class PersistMethodsImportDataSet{
      */
     public static function getTainacanTypeProperty($property){
         $type = '';
-        $data = ['text', 'textarea', 'date', 'number', 'numeric', 'auto-increment', 'user'];
+        $data = ['text', 'textarea', 'date', 'number', 'numeric', 'autoincrement', 'auto-increment', 'user'];
         $term = ['selectbox', 'radio', 'checkbox', 'tree', 'tree_checkbox', 'multipleselect'];
-        if($property['type'] === 'item'){
+        if($property['type'] === 'item' || $property['type'] === 'Nenhuma relação'){
             $type = 'socialdb_property_object';
         }else if($property['type'] === 'compound'){
             $type = 'socialdb_property_compounds';

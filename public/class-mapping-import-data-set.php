@@ -11,9 +11,9 @@ class MappingImportDataSet{
     public static $map;
 
     public static function isMapped(){
-        $option = get_option('mapping-tainacan-import');
+        $option = unserialize(get_option('mapping-tainacan-import'));
         //return is_file(self::$file_name);
-        return $option && is_array($option);
+        return $option;
     }
 
     /**
@@ -24,9 +24,13 @@ class MappingImportDataSet{
         if($mapping){
             //$rawMap = file_get_contents(self::$file_name);
             //self::$map =  json_decode($rawMap, true);
+            if((is_array($mapping) && empty($mapping)) || is_bool($mapping) ){
+                self::$map = [ 'collections' => [], 'properties' => [], 'categories' => [],'tabs'=>[],'references-properties'=>[],'references-categories'=>[],'references-collections'=>[],'menu'=>[]];
+            }
             self::$map =  $mapping;
         }else{
-            self::$map = [ 'collections' => [], 'properties' => [], 'categories' => [],'tabs'=>[],'references-properties'=>[],'references-categories'=>[]];
+            self::$map = [];
+            self::$map = [ 'collections' => [], 'properties' => [], 'categories' => [],'tabs'=>[],'references-properties'=>[],'references-categories'=>[],'references-collections'=>[],'menu'=>[]];
         }
     }
 
@@ -39,7 +43,8 @@ class MappingImportDataSet{
         if(!is_array(self::$map)){
             self::initMap();
         }
-        self::$map[$type][$id_file] = $id_tainacan;
+        if($type && $id_file)
+                self::$map[$type][$id_file] = $id_tainacan;
     }
 
     /**
@@ -57,7 +62,16 @@ class MappingImportDataSet{
     public static function saveMap(){
         //if(self::isMapped())
             //(self::$file_name);
-        update_option('mapping-tainacan-import', self::$map);
+        if(is_array(self::$map))
+            update_option('mapping-tainacan-import', serialize(self::$map));
         //self::generateJsonFile(self::$file_name);
+    }
+
+    public static function var_error_log( $object=null ){
+        ob_start();                    // start buffer capture
+        var_dump( $object );           // dump the values
+        $contents = ob_get_contents(); // put the buffer into a variable
+        ob_end_clean();                // end capture
+        error_log( $contents );        // log contents of the result of var_dump( $object )
     }
 }
