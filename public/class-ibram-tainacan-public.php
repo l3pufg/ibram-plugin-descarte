@@ -1195,7 +1195,7 @@ class Ibram_Tainacan_Public {
        }
 
        public function ibram_alter_categories_to_find_properties($categories){
-           $names_categories = ['Função Entidade Pessoa','Funções Entidade Coletiva','Funções Familia','Tipo de Entidade'];
+           $names_categories = ['Função Entidade Pessoa','Funções Entidade Coletiva','Funções Familia','Tipo de entidade'];
            $categories_localization = ['Interna','Externa','Tipo de localização'];
            if(is_array($categories)){
                $categories = array_filter(array_unique($categories));
