@@ -121,19 +121,21 @@ class PersistMethodsImportDataSet{
                             update_post_meta($collection_id, 'socialdb_collection_property_'.$id.'_mask_key', $metadata['is_mask']);
 
                             ///visibilidade
-                            $meta = get_post_meta($collection_id, 'socialdb_collection_fixed_properties_visibility', true);
-                            if ($meta && $meta != ''):
-                                $array = explode(',', $meta);
-                                if (is_array($array) && count($array) > 0 && ($key = array_search($id, $array)) !== false):
-                                    unset($array[$key]);
-                                elseif (is_array($array)):
-                                    $array[] =$id;
+                            if($metadata['visibility'] && $metadata['visibility']=='off') {
+                                $meta = get_post_meta($collection_id, 'socialdb_collection_fixed_properties_visibility', true);
+                                if ($meta && $meta != ''):
+                                    $array = explode(',', $meta);
+                                    if (is_array($array) && count($array) > 0 && ($key = array_search($id, $array)) !== false):
+                                        unset($array[$key]);
+                                    elseif (is_array($array)):
+                                        $array[] = $id;
+                                    endif;
+                                else:
+                                    $array = [];
+                                    $array[] = $id;
                                 endif;
-                            else:
-                                $array = [];
-                                $array[] = $id;
-                            endif;
-                            update_post_meta($collection_id, 'socialdb_collection_fixed_properties_visibility', implode(',', $array));
+                                update_post_meta($collection_id, 'socialdb_collection_fixed_properties_visibility', implode(',', $array));
+                            }
                         // metadado do repositorio porem nao fixo
                         }else if($metadata['metadata']['is_repository_property']){
                             $id = MappingImportDataSet::hasMap('properties',$metadata['id']);

@@ -1196,12 +1196,16 @@ class Ibram_Tainacan_Public {
 
        public function ibram_alter_categories_to_find_properties($categories){
            $names_categories = ['Função Entidade Pessoa','Funções Entidade Coletiva','Funções Familia'];
+           $categories_localization = ['Interna','Externa','Tipo de localização'];
            if(is_array($categories)){
                $categories = array_filter(array_unique($categories));
                foreach ($categories as $category){
                    $cat = get_term_by('id',$category,'socialdb_category_type');
                    if($cat && in_array($cat->name,$names_categories)){
                        $collection = $this->get_post_by_title('Entidades');
+                       $root_category = get_post_meta($collection->ID,'socialdb_collection_object_type',true);
+                   }else if($cat && in_array($cat->name,$categories_localization)){
+                       $collection = $this->get_post_by_title('Localização');
                        $root_category = get_post_meta($collection->ID,'socialdb_collection_object_type',true);
                    }else if(isset($cat->parent) && $cat->parent != 0 ){
                         $parent = get_term_by('id',$cat->parent,'socialdb_category_type');
@@ -1212,6 +1216,8 @@ class Ibram_Tainacan_Public {
                    }
                }
            }
+
+
 
            if(isset($root_category) && !in_array($root_category,$categories))
                $categories[] = $root_category;
