@@ -1081,7 +1081,8 @@ class Ibram_Tainacan_Public {
                 $categories = wp_get_object_terms($item_id,'socialdb_category_type');
                 if(is_array($categories)){
                     foreach ($categories as $category) {
-                        if(in_array($category->name,['2 - Não Localizado','3 - Registro Excluído (Baixa)'])){
+                        //if(in_array($category->name,['2 - Não Localizado','3 - Registro Excluído (Baixa)'])){
+                        if(in_array($category->name,['2 - Não Localizado'])){
                             return true;
                         }
                          //verifico se eh bem permanente apos verificar se nao eh perdido ou excluido
