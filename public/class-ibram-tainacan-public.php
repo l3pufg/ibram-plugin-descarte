@@ -1082,7 +1082,7 @@ class Ibram_Tainacan_Public {
                 if(is_array($categories)){
                     foreach ($categories as $category) {
                         //if(in_array($category->name,['2 - Não Localizado','3 - Registro Excluído (Baixa)'])){
-                        if(in_array($category->name,['2 - Não Localizado'])){
+                        if(in_array($category->name,['3 - Registro Excluído (Baixa)'])){
                             return true;
                         }
                          //verifico se eh bem permanente apos verificar se nao eh perdido ou excluido
