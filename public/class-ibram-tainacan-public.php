@@ -1218,10 +1218,9 @@ class Ibram_Tainacan_Public {
                }
            }
 
-
-
            if(isset($root_category) && !in_array($root_category,$categories))
                $categories[] = $root_category;
+
            return $categories;
        }
 
