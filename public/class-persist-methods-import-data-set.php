@@ -121,7 +121,7 @@ class PersistMethodsImportDataSet{
                             update_post_meta($collection_id, 'socialdb_collection_property_'.$id.'_mask_key', $metadata['is_mask']);
 
                             ///visibilidade
-                            if($metadata['visibility'] && $metadata['visibility']=='off') {
+                            if($metadata['visibility'] && $metadata['visibility']==='off') {
                                 $meta = get_post_meta($collection_id, 'socialdb_collection_fixed_properties_visibility', true);
                                 if ($meta && $meta != ''):
                                     $array = explode(',', $meta);
@@ -161,7 +161,10 @@ class PersistMethodsImportDataSet{
                     }
                 }
             }
-
+            //
+            foreach ($ids_metadados as $index => $tab) {
+                $ids_metadados[$index] = implode(',', $tab);
+            }
             // atualizar os valores da ordenacao
             update_post_meta($collection_id, 'socialdb_collection_properties_ordenation', serialize($ids_metadados));
         }
@@ -334,7 +337,7 @@ class PersistMethodsImportDataSet{
         update_term_meta($term->term_id, 'socialdb_property_real_name', $term->name );
         update_term_meta($term->term_id, 'socialdb_property_visibility', ($property['visibility'] === 'on') ? 'show' : 'off' );
         update_term_meta($term->term_id, 'socialdb_property_help', (isset($property['help'])) ? $property['help'] : '' );
-        update_term_meta($term->term_id, 'socialdb_property_locked', (isset($property['locked'])) ? 'true' : 'false' );
+        update_term_meta($term->term_id, 'socialdb_property_locked', (isset($property['locked']) && $property['locked']) ? 'true' : 'false' );
         update_term_meta($term->term_id, 'socialdb_property_data_mask', ($property['is_mask']) ? $property['is_mask'] : '' );
         update_term_meta($term->term_id, 'socialdb_property_required', ($property['required']) ? 'true' : 'false' );
         MappingImportDataSet::addMap('properties',$property['id'],$term->term_id);
@@ -427,10 +430,12 @@ class PersistMethodsImportDataSet{
      */
     public static function updateProperty($term_id,$property,$token,$is_repo = false,$is_compound = false){
         $type = self::getTainacanTypeProperty($property);
-        $array = wp_update_term($term_id,'socialdb_property_type');
+        $array = wp_update_term($term_id,'socialdb_property_type',['name'=>$property['name']]);
         if (!is_wp_error($array) && isset($array['term_id']) && isset($property['metadata'])) {
             self::updateMetasCommoms($array['term_id'],$property,$token,$is_repo,$is_compound);
             self::updateSpecificMeta($array['term_id'],$property,$property['type'],$token,$is_repo,$is_compound);
+        }else{
+            var_dump($term_id,'socialdb_property_type',['name'=>$property['name']],$array);
         }
         return $array['term_id'];
     }
@@ -479,7 +484,7 @@ class PersistMethodsImportDataSet{
             update_term_meta($term_id, 'socialdb_property_collection_id', MappingImportDataSet::hasMap('collections',$return['collection_id']));
 
         //obrigatorio
-        update_term_meta($term_id, 'socialdb_property_required', ($return['required']) ? 'true' : 'false');
+        update_term_meta($term_id, 'socialdb_property_required', ($return['required'] && $return['required']===true) ? 'true' : 'false');
 
         //categoria que foi criado
         $cat =  (MappingImportDataSet::hasMap('categories',$return['created_category']) ?  MappingImportDataSet::hasMap('categories',$return['created_category']) : get_term_by('slug','socialdb_category','socialdb_category_type')->term_id);
@@ -497,7 +502,7 @@ class PersistMethodsImportDataSet{
         update_term_meta($term_id, 'socialdb_property_visualization', $return['visualization']);
 
         //esta desativado?
-        update_term_meta($term_id, 'socialdb_property_locked', ($return['locked']) ? 'true' : 'false');
+        update_term_meta($term_id, 'socialdb_property_locked', ($return['locked'] && $return['locked'] === true) ? 'true' : '');
 
         //se eh metadado do repositorio
         update_term_meta($term_id, 'is_repository_property', ($is_repo) ? 'true' : 'false');
@@ -644,6 +649,7 @@ class PersistMethodsImportDataSet{
         $return = $property['metadata'];
 
         update_term_meta($term_id, 'socialdb_property_term_cardinality',  ($return['cardinality']) ? $return['cardinality']: '1');
+        update_term_meta($term_id, 'socialdb_property_term_widget', $property['type']);
 
         //se o metadado eh reverso
         if($return['taxonomy']){
@@ -685,7 +691,7 @@ class PersistMethodsImportDataSet{
             }
         }
         //$childrens =  $property['metas']['socialdb_property_compounds_properties_id'];
-        update_term_meta($term_id, 'socialdb_property_compounds_cardinality',  ($ids) ? implode(',',$ids): '');
+        update_term_meta($term_id, 'socialdb_property_compounds_properties_id',  ($ids) ? implode(',',$ids): '');
     }
 
     /**
