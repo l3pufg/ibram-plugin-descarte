@@ -839,9 +839,7 @@ class Ibram_Tainacan_Public {
     /**
     *
     */
-    public function ibram_disable_header_collection(){
-
-    }
+    public function ibram_disable_header_collection(){}
 
     public function show_reason_modal() { ?>
         <div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="reasonModal" aria-hidden="true" data-backdrop="static">
@@ -1253,6 +1251,24 @@ class Ibram_Tainacan_Public {
                             if ($values && is_array($values) && count(array_filter($values)) > 0) {
                                 //$data['msg'] = __('There are items selected in this set', 'tainacan');
                                 $data['msg'] = 'Há entidades relacionadas a este registro';
+                                $data['type'] = 'info';
+                                $data['title'] = __('Attention', 'tainacan');
+                                return $data;
+                            }
+                            // break;
+                        }
+                    }
+                }
+            }else if($ibram['bem_permanente'] == $collection_id || $ibram['temporario'] == $collection_id){
+                $category_root = get_post_meta($collection_id, 'socialdb_collection_object_type', true);
+                $properties = get_term_meta($category_root, 'socialdb_category_property_id');
+                if ($properties) {
+                    foreach ($properties as $property) {
+                        if (in_array(get_term_by('id', $property, 'socialdb_property_type')->name, ['Coleções','Conjuntos'])) {
+                            $values = get_post_meta($item_id, 'socialdb_property_' . $property);
+                            if ($values && is_array($values) && count(array_filter($values)) > 0) {
+                                //$data['msg'] = __('There are items selected in this set', 'tainacan');
+                                $data['msg'] = 'Há coleções ou conjuntos relacionadas a este registro';
                                 $data['type'] = 'info';
                                 $data['title'] = __('Attention', 'tainacan');
                                 return $data;
