@@ -30,7 +30,7 @@ require_once dirname(__FILE__).'/class-import-data-set.php';
 
 $start = microtime(true);
 echo("==========================================================". PHP_EOL);
-echo '== Inicializando importacao ...'. PHP_EOL;
+echo '=== Inicializando importacao, isso podera levar alguns minutos...'. PHP_EOL;
 ImportDataSet::start();
 $scripttime = microtime(true) - $start;
 echo("==========================================================". PHP_EOL);

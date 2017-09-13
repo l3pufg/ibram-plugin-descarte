@@ -38,7 +38,7 @@ class PersistMethodsImportDataSet{
          $has_id = MappingImportDataSet::hasMap('collections',$collection_post['ID']);
 
          //log
-         echo ' Inserindo colecao:  '.$collection_post['post_title'].PHP_EOL;
+         echo '=== Inserindo colecao:  '.$collection_post['post_title'].PHP_EOL;
 
          $post = array(
             'post_title' => $collection_post['post_title'],
