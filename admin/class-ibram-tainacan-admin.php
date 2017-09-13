@@ -140,4 +140,22 @@ class Ibram_Tainacan_Admin {
         register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
     }
 
+    public function ibram_admin_message(){
+        $option = get_option('ibram-tainacan');
+        if(!$option) {
+            $html = '<div class="error">';
+            $html .= '<p>';
+            $html .= 'Você deve executar o script de inicialização para completar sua instalação IBRAM!<br><hr>';
+            $html .= 'Caso sua instalação seja <b>multisite</b>:<br>';
+            $html .= 'Alterar o arquivo script.php dentro de '.plugin_dir_path(__DIR__).'public as seguintes linhas :<br><br>';
+            $html .= '&nbsp;&nbsp;&nbsp;<i>define( "MULTISITE", true);</i><br>';
+            $html .= '&nbsp;&nbsp;&nbsp;<i>$_SERVER["HTTP_HOST"] = "site.exemplo.com";</i><br>';
+            $html .= '&nbsp;&nbsp;&nbsp;<i>$_SERVER["REQUEST_URI"] = "/subdominio/";</i><br><br><hr>';
+            $html .= 'Execute o comando abaixo no ssh de seu servidor: <br><br>&nbsp;&nbsp;&nbsp;<i>php '.plugin_dir_path(__DIR__).'public/script.php</i>  <br>';
+            $html .= '</p>';
+            $html .= '</div><!-- /.updated -->';
+            echo $html;
+        }
+    }
+
 }

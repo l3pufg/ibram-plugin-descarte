@@ -1,17 +1,18 @@
 <?php
 /**
- * Classe responsavel por iniciar a execuacao da importacao do set
+ * Classe responsavel por iniciar a execucao da importacao do set
  * User: desenvolvedor
  * Date: 24/08/2017
  * Time: 16:41
  */
-include_once dirname(__FILE__).'/class-helper-file-import-data-set.php';
-include_once dirname(__FILE__).'/class-mapping-import-data-set.php';
-include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
 
  class ImportDataSet{
 
     public static function start(){
+        session_write_close();
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        ini_set('max_execution_time', '0');
         //error_reporting(E_ALL);
         // busco os dados do repositorio metadados/informacoes gerais
         $repository = HelperFileImportDataSet::getRepository();
@@ -20,10 +21,10 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
         // inicio o mapeamento ou busco o ja existente
         MappingImportDataSet::initMap();
 
-//        $option = unserialize(get_option('mapping-tainacan-import'));
-//        if($option){
-//            return true;
-//        }
+        $option = unserialize(get_option('mapping-tainacan-import'));
+        if($option){
+            return true;
+        }
 
         // adicionando ou atualizando os metadados do repositorio
         self::proccessRepositoryProperties($repository);
@@ -32,15 +33,19 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
         self::proccessCollections($collections);
 
         // atualizo as informacoes gerais do repositorio, desmembrado pois depende das colecoes
+        echo '== Atualizando informacoes gerais do repositorio '.PHP_EOL;
         PersistMethodsImportDataSet::updateRepository($repository);
 
         //atualizo as referencias de metadados para valores antigos
+        echo '== Atualizando as referencias... '.PHP_EOL;
         self::updateReferences();
 
         //removo possiveis colecoes,metadados ou categorias desatualizadas
+        echo '== em caso de atualizacao... '.PHP_EOL;
         self::garbageCollector();
 
         //criar o menu
+        echo '== finalizando os menus e... '.PHP_EOL;
         self::createMenus();
 
         //salvo o mapeamento
@@ -73,7 +78,12 @@ include_once dirname(__FILE__).'/class-persist-methods-import-data-set.php';
       */
      public static function proccessCollections($collections){
          foreach ($collections as $collection){
+             $partial = microtime(true);
              PersistMethodsImportDataSet::manageCollection($collection);
+             $steptime = microtime(true) - $partial;
+             $partial = microtime(true);
+             echo ("== Passo finalizado em {$steptime}s".PHP_EOL);
+             echo("==========================================================".PHP_EOL);
          }
      }
 

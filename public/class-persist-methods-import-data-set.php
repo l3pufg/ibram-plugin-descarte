@@ -36,6 +36,10 @@ class PersistMethodsImportDataSet{
          $collection_settings = $collection['filters']['metadata'];
          $collection_metadata = $collection['metadata'];
          $has_id = MappingImportDataSet::hasMap('collections',$collection_post['ID']);
+
+         //log
+         echo ' Inserindo colecao:  '.$collection_post['post_title'].PHP_EOL;
+
          $post = array(
             'post_title' => $collection_post['post_title'],
             'post_content' => $collection_post['post_content'],
@@ -499,7 +503,7 @@ class PersistMethodsImportDataSet{
         }
 
         //visualizacao
-        update_term_meta($term_id, 'socialdb_property_visualization', $return['visualization']);
+        update_term_meta($term_id, 'socialdb_property_visualization', isset($return['visualization']) ? $return['visualization'] : '');
 
         //esta desativado?
         update_term_meta($term_id, 'socialdb_property_locked', ($return['locked'] && $return['locked'] === true) ? 'true' : '');
@@ -646,6 +650,11 @@ class PersistMethodsImportDataSet{
      * @param $is_repo
      */
     public static function updateMetasTermProperty($term_id,$property,$token,$is_repo){
+        session_write_close();
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        ini_set('max_execution_time', '0');
+
         $return = $property['metadata'];
 
         update_term_meta($term_id, 'socialdb_property_term_cardinality',  ($return['cardinality']) ? $return['cardinality']: '1');
@@ -702,13 +711,36 @@ class PersistMethodsImportDataSet{
      */
     public static function updateCategory($category,$token, $parent = false,$term_id = false){
         //se caso estiver criando
+        wp_cache_flush();
         if(!$term_id) {
             $args = array('parent' => ( $parent ) ? $parent : get_term_by('slug','socialdb_category','socialdb_category_type')->term_id ,
                 'slug' => self::generateSlug(trim($category['term']['name'])));
-            $array = wp_insert_term($category['term']['name'], 'socialdb_category_type', $args);
+
+            //verifico pelo nome e pai
+            if($parent)
+                $has_same = self::verifyHasCategoryWithNameAndParent($parent,$category['term']['name']);
+
+            //verificando se a categoria ja foi inserida
+            if($has_same){
+                $array = $has_same;
+            }else if(isset($category['term']['term_id'])){
+                $has_id = MappingImportDataSet::hasMap('categories',$category['term']['term_id']);
+                if($has_id){
+                    $has_token = get_term_meta($has_id,'socialdb_token',true);
+                    if($has_token !== $token){
+                        $array = wp_update_term($has_id, 'socialdb_category_type', ['name'=>$category['term']['name']]);
+                    }
+                }else{
+                    $array = wp_insert_term($category['term']['name'], 'socialdb_category_type', $args);
+                }
+            }else{
+                $array = wp_insert_term($category['term']['name'], 'socialdb_category_type', $args);
+            }
+
             if(is_wp_error($array)){
                 echo '<pre>';
                 var_dump($array,$category,$args);
+                return false;
             }
             update_term_meta($array['term_id'],'socialdb_category_owner',get_current_user_id());
             if(isset($category['term']['term_id']))
@@ -733,15 +765,28 @@ class PersistMethodsImportDataSet{
         }
 
         //se possuir categorias filhas
-        if( isset($category['children']) ){
-            foreach ($category['children'] as $child) {
+        if( isset($category['term']['children']) && !empty($category['term']['children'])){
+            foreach ($category['term']['children'] as $child) {
                 $has_id = MappingImportDataSet::hasMap('categories',$child['id']);
-                self::updateCategory($child,$token,$array['term_id'],($has_id) ? $has_id : false);
+                $array_children = ['term'=> $child];
+                self::updateCategory($array_children,$token,$array['term_id'],($has_id) ? $has_id : false);
             }
         }
 
         update_term_meta($array['term_id'], 'socialdb_token', $token);
         return $array['term_id'];
+    }
+
+    public static function verifyHasCategoryWithNameAndParent($parent,$name){
+        global $wpdb;
+        $query = "SELECT * FROM `$wpdb->term_taxonomy` tt INNER JOIN $wpdb->terms t ON t.term_id = tt.term_id WHERE tt.`parent` = $parent AND t.name = '".esc_sql($name)."' ";
+        $results = $wpdb->get_results($query);
+        if($results && is_array($results) && count($results) > 0){
+            return ['term_id'=>$results[0]->term_id];
+        }else{
+            return false;
+        }
+
     }
 
     /**

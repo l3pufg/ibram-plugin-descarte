@@ -742,8 +742,16 @@ class Ibram_Tainacan_Public {
             if($properties_siblings && is_array($properties_siblings)){
                 foreach ($properties_siblings as $sibling){
                     $term_sibling = get_term_by('id',$sibling,'socialdb_property_type');
-                    if($term_sibling->name === 'Estado' || $term_sibling->name === 'Estado/Província'){
-
+                    if($term_sibling->name === 'Estado' || $term_sibling->name === 'Estado/Província' || $term_sibling->name === 'Informações adicionais'){
+                        //se for o composto
+                        if($term_sibling->name === 'Informações adicionais'){
+                            $ids = explode(',',get_term_meta($term_sibling->term_id,'socialdb_property_compounds_properties_id',true));
+                            foreach ($ids as $id) {
+                                 $term_sibling = get_term_by('id',$id,'socialdb_property_type');
+                                 if($term_sibling->name === 'Estado' || $term_sibling->name === 'Estado/Província' )
+                                     break;
+                            }
+                        }
                         //busco o id do estado para buscar as cidades
                         $id = str_replace($property['id'],$term_sibling->term_id,$id_selectbox);
                         ?>
@@ -1029,18 +1037,28 @@ class Ibram_Tainacan_Public {
                    $con = $this->get_post_by_title('Conjuntos'); 
                    if (is_object($con) ) {
                        // busco verifico se o BEM esta vinculado na colecao conjuntos  
-                        $property_id = $this->findPropertyBens($con->ID);
-                        if($property_id && $this->is_selected_property($property_id, $item_id))
+                        $property_id = $this->findPropertyBens($con->ID,'Bens permanentes envolvidos');
+                        $property_other_id = $this->findPropertyBens($con->ID,'Bens temporários envolvidos');
+                        if($property_id && $this->is_selected_property($property_id, $item_id)){
                            return true;
-                        } 
+                        }
+                        if($property_other_id && $this->is_selected_property($property_other_id, $item_id)){
+                           return true;
+                        }
+                     }
                }
                if($collection->post_title === 'Conjuntos'){
                    $con = $this->get_post_by_title('Coleções'); 
                    if (is_object($con) ) {
                         // busco verifico se o bem esta vinculado na colecao 'colecao'
-                        $property_id = $this->findPropertyBens($con->ID);
-                        if($property_id && $this->is_selected_property($property_id, $item_id))
+                        $property_id = $this->findPropertyBens($con->ID,'Bens permanentes envolvidos');
+                        $property_other_id = $this->findPropertyBens($con->ID,'Bens temporários envolvidos');
+                        if($property_id && $this->is_selected_property($property_id, $item_id)){
                            return true;
+                        }
+                        if($property_other_id && $this->is_selected_property($property_other_id, $item_id)){
+                           return true;
+                        }
                    }
                 }
             }else if($property && $property->name === 'Autor'){

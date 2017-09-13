@@ -144,7 +144,14 @@ class Ibram_Tainacan {
         // Save/Update IBRAM plugin options
         $this->loader->add_action('admin_init', $plugin_admin, 'options_update');
 
-	}
+
+        // Display the admin notification
+        $this->loader->add_action( 'admin_notices',$plugin_admin,'ibram_admin_message' ) ;
+
+
+
+
+    }
 
 	/**
 	 * Register all of the hooks related to the public-facing functionality
