@@ -33,19 +33,19 @@
         self::proccessCollections($collections);
 
         // atualizo as informacoes gerais do repositorio, desmembrado pois depende das colecoes
-        echo '== Atualizando informacoes gerais do repositorio '.PHP_EOL;
+        echo '=== Atualizando informacoes gerais do repositorio '.PHP_EOL;
         PersistMethodsImportDataSet::updateRepository($repository);
 
         //atualizo as referencias de metadados para valores antigos
-        echo '== Atualizando as referencias... '.PHP_EOL;
+        echo '=== Atualizando as referencias... '.PHP_EOL;
         self::updateReferences();
 
         //removo possiveis colecoes,metadados ou categorias desatualizadas
-        echo '== em caso de atualizacao... '.PHP_EOL;
+        echo '=== em caso de atualizacao... '.PHP_EOL;
         self::garbageCollector();
 
         //criar o menu
-        echo '== finalizando os menus e... '.PHP_EOL;
+        echo '=== finalizando os menus e... '.PHP_EOL;
         self::createMenus();
 
         //salvo o mapeamento
@@ -82,7 +82,7 @@
              PersistMethodsImportDataSet::manageCollection($collection);
              $steptime = microtime(true) - $partial;
              $partial = microtime(true);
-             echo ("== Passo finalizado em {$steptime}s".PHP_EOL);
+             echo ("=== Passo finalizado em {$steptime}s".PHP_EOL);
              echo("==========================================================".PHP_EOL);
          }
      }
