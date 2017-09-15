@@ -121,7 +121,7 @@ class PersistMethodsImportDataSet{
                             endif;
 
                             //demais campos
-                            update_post_meta($collection_id, 'socialdb_collection_property_'.$id.'_required', $metadata['required']);
+                            update_post_meta($collection_id, 'socialdb_collection_property_'.$id.'_required',( $metadata['required'] ) ? 'true': 'false');
                             update_post_meta($collection_id, 'socialdb_collection_property_'.$id.'_mask_key', $metadata['is_mask']);
 
                             ///visibilidade
@@ -548,7 +548,7 @@ class PersistMethodsImportDataSet{
         update_term_meta($term_id, 'socialdb_property_help', ($return['text_help'] === '') ? '' : $return['text_help']);
 
         //se for data aproximada
-        update_term_meta($term_id, 'socialdb_property_help', ($return['is_aproximate_date']) ? '1': '0');
+        update_term_meta($term_id, 'socialdb_property_is_aproximate_date', ($return['is_aproximate_date']) ? '1': '0');
     }
 
     /**
@@ -742,7 +742,7 @@ class PersistMethodsImportDataSet{
                 var_dump($array,$category,$args);
                 return false;
             }
-            update_term_meta($array['term_id'],'socialdb_category_owner',get_current_user_id());
+            update_term_meta($array['term_id'],'socialdb_category_owner',1);
             if(isset($category['term']['term_id']))
                 MappingImportDataSet::addMap( 'categories', $category['term']['term_id'], $array['term_id']);
         }else {
@@ -851,7 +851,7 @@ class PersistMethodsImportDataSet{
     public static function saveMetaById($table,$meta_id,$meta_value){
         global $wpdb;
         $table = ($table === 'post') ? $wpdb->postmeta : $wpdb->termmeta;
-        $query = "UPDATE $wpdb->postmeta SET meta_value = '".$meta_value."' WHERE meta_id = ".$meta_id;
+        $query = "UPDATE $table SET meta_value = '".$meta_value."' WHERE meta_id = ".$meta_id;
         $wpdb->get_results($query);
     }
 
