@@ -312,7 +312,7 @@ class PersistMethodsImportDataSet{
      */
     public static function updateTableMetasCollection($collection_id,$collection_settings){
         $new_array = [];
-        if(isset($collection_settings['table_metas']) && empty($collection_settings['table_metas']) && $collection_settings['table_metas']){
+        if(isset($collection_settings['table_metas']) && !empty($collection_settings['table_metas']) && $collection_settings['table_metas']){
             if(!is_array($collection_settings['table_metas']))
                 $collection_settings['table_metas'] = [$collection_settings['table_metas']];
 
