@@ -12,7 +12,7 @@ define( 'IBRAM_PATH', dirname(__FILE__).'/../' );
 
 define( 'MULTISITE', true);
 $_SERVER['HTTP_HOST'] = 'localhost';
-$_SERVER['REQUEST_URI'] = '/wordpress/teste-nova-api/';
+$_SERVER['REQUEST_URI'] = '/wordpress/teste01/';
 
 
 //////////////////////////////////////////////////////////////////////////////////////

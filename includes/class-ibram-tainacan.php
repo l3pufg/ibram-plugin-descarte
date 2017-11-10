@@ -183,6 +183,11 @@ class Ibram_Tainacan {
         $this->loader->add_action('alter_home_page', $plugin_public, 'alter_home_page');
 
         $this->loader->add_action( 'filter_search_alter', $plugin_public, 'filter_search_alter', 10, 2);
+
+		$this->loader->add_action( 'help_text_change_input_type', $plugin_public, 'help_text_change_input_type', 10);
+		$this->loader->add_action( 'tainacan_global_modals', $plugin_public, 'tainacan_global_modals', 10);
+		$this->loader->add_action( 'change_meta_info_icon', $plugin_public, 'change_meta_info_icon', 10, 1 );
+
         // label metadado de relacionamento //removido por acordo
         //$this->loader->add_filter( 'alter_label_item_search', $plugin_public, 'ibram_alter_label_item_search',10, 1 );
 
@@ -196,7 +201,7 @@ class Ibram_Tainacan {
         $this->loader->add_filter( 'alter_repository_api_response', $plugin_public, 'alter_repository_api_response',10, 1 );
         // acao para bem permanente: bloquear listagem para colecoes ou conjuntos dependendo se o outro possuir
         // valor no item passado como parametro
-        $this->loader->add_filter('alter_list_metadata_relations', $plugin_public,'ibram_alter_list_metadata_relations',10,2);
+        $this->loader->add_filter( 'alter_list_metadata_relations', $plugin_public,'ibram_alter_list_metadata_relations', 10, 2 );
         $this->loader->add_filter( 'avoid-items-list-items-property-object', $plugin_public, 'verify_has_relation_in_collection',10, 3 );
         $this->loader->add_filter( 'alter_label_exclude', $plugin_public, 'alter_label_exclude',10, 1 );
         $this->loader->add_filter( 'tainacan_alter_delete_object', $plugin_public, 'set_collection_delete_object',10, 1 );

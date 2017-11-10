@@ -10,9 +10,12 @@ function showIbramSearch( search_term) {
         $('#main_part').hide();
         $('.menu-ibram').hide();
         $('.ibram-home-container').hide();
-        $('#configuration').html(result).show();
-        $('#configuration').css('margin-top','40px');
-        $('#configuration').css('background','#f2f2f2');
+        $('#configuration').html(result).show().css('margin-top','40px').css('background','#f2f2f2');
         $('.header-navbar').css('background-color','black');
     });
+}
+
+function showHelpText(id) {
+    $("#helpTextModal").modal('show');
+    $("#helpModalText").text($("#modalHelpText"+id).text());
 }
