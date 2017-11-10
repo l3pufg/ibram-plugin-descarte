@@ -707,7 +707,7 @@ class Ibram_Tainacan_Public {
         <textarea class="form-control" id="socialdb_property_data_help" name="socialdb_property_data_help" rows="5"></textarea>
         <?php
 
-    }
+    }//
 
     public function tainacan_global_modals()
     {
