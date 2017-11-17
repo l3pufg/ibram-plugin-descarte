@@ -21,4 +21,3 @@ function showHelpText(id) {
 }
 
 $('.menu-ibram li').css('border-top','5px solid #272727');
-$('.menu-ibram li.current-menu-item, .menu-ibram li.current-menu-parent').css('border-top','5px solid #272727');
