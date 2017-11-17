@@ -19,3 +19,5 @@ function showHelpText(id) {
     $("#helpTextModal").modal('show');
     $("#helpModalText").text($("#modalHelpText"+id).text());
 }
+
+$('.menu-ibram li').css('border-top','5px solid #272727');
