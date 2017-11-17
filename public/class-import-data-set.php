@@ -299,11 +299,11 @@
                 self::addMetasMenu($matter_id,$adm_id,site_url().'/assunto');
                 MappingImportDataSet::addMap('menu', 13, $matter_id);
             }
-             if(!MappingImportDataSet::hasMap('menu', 14)) {
-                 $par_id = self::createPostMenu('Instituição Utilizadora', 14, $menu_id);
-                 self::addMetasMenu($par_id, $adm_id, site_url().'/instituicao-utilizadora/insituição-utilizadora/editar/');
-                 MappingImportDataSet::addMap('menu', 14, $par_id);
-             }
+//             if(!MappingImportDataSet::hasMap('menu', 14)) {
+//                 $par_id = self::createPostMenu('Instituição Utilizadora', 14, $menu_id);
+//                 self::addMetasMenu($par_id, $adm_id, site_url().'/instituicao-utilizadora/insituição-utilizadora/editar/');
+//                 MappingImportDataSet::addMap('menu', 14, $par_id);
+//             }
      }
 
      private static function createPostMenu($title,$order,$menu_id){
