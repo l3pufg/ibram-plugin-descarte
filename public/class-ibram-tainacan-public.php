@@ -701,13 +701,15 @@ class Ibram_Tainacan_Public {
 
     }
 
-    public function help_text_change_input_type($property)
+    public function help_text_change_input_type($property_name)
     {
+        if(empty($property_name))
+            $property_name = 'socialdb_property_data_help';
         ?>
-        <textarea class="form-control" id="socialdb_property_data_help" name="socialdb_property_data_help" rows="5"></textarea>
+        <textarea class="form-control" id="<?= $property_name ?>" name="<?= $property_name ?>" rows="5"></textarea>
         <?php
 
-    }//
+    }
 
     public function tainacan_global_modals()
     {
