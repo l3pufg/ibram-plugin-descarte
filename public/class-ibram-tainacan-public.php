@@ -1337,7 +1337,10 @@ class Ibram_Tainacan_Public {
                         $values = get_post_meta($item_id, 'socialdb_property_' . $property);
                         if ($values && is_array($values) && count(array_filter($values)) > 0) {
                             //$data['msg'] = __('There are items selected in this set', 'tainacan');
-                            $data['msg'] = 'Há entidades relacionadas a este registro';
+                            if(strcmp(get_post($collection_id)->post_title, 'Conjuntos') === 0)
+                                $data['msg'] = 'O Conjunto possui Bens associados';
+                            else $data['msg'] = 'O Coleção possui Bens associados';
+
                             $data['type'] = 'info';
                             $data['title'] = __('Attention', 'tainacan');
                             return $data;
@@ -1355,7 +1358,7 @@ class Ibram_Tainacan_Public {
                         $values = get_post_meta($item_id, 'socialdb_property_' . $property);
                         if ($values && is_array($values) && count(array_filter($values)) > 0) {
                             //$data['msg'] = __('There are items selected in this set', 'tainacan');
-                            $data['msg'] = 'Há coleções ou conjuntos relacionadas a este registro';
+                            $data['msg'] = "O Bem selecionado pertence a uma Coleção ou Conjunto.";
                             $data['type'] = 'info';
                             $data['title'] = __('Attention', 'tainacan');
                             return $data;
